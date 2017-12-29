@@ -1,20 +1,15 @@
 import axios from 'axios'
-import env from '../../build/env'
 import semver from 'semver'
-import packjson from '../../package.json'
 
 let util = {}
+
 /*修改窗口标题*/
 util.title = function (title) {
   title = title || 'iView admin'
   window.document.title = title
 }
 
-const ajaxUrl = env === 'development'
-  ? 'http://127.0.0.1:8888'
-  : env === 'production'
-    ? 'https://www.url.com'
-    : 'https://debug.url.com'
+const ajaxUrl = 'development'
 
 util.ajax = axios.create({
   baseURL: ajaxUrl,
@@ -253,17 +248,14 @@ util.fullscreenEvent = function (vm) {
 }
 
 util.checkUpdate = function (vm) {
-  axios.get('https://api.github.com/repos/iview/iview-admin/releases/latest').then(res => {
-    let version = res.data.tag_name
-    vm.$Notice.config({
-      duration: 0
+  axios.get('/api/wechat/findOne').then(res => {
+    let version = res.data.result.content
+    let title = res.data.result.title
+    vm.$Notice.open({
+      title: title,
+      desc: version,
+      duration: 10
     })
-    if (semver.lt(packjson.version, version)) {
-      vm.$Notice.info({
-        title: 'iview-admin更新啦',
-        desc: '<p>iView-admin更新到了' + version + '了，去看看有哪些变化吧</p><a style="font-size:13px;" href="https://github.com/iview/iview-admin/releases" target="_blank">前往github查看</a>'
-      })
-    }
   })
 }
 

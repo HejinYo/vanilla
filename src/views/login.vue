@@ -1,83 +1,93 @@
-<style lang="less">
-    @import './login.less';
-</style>
-
 <template>
-    <div class="login" @keydown.enter="handleSubmit">
-        <div class="login-con">
-            <Card :bordered="false">
-                <p slot="title">
-                    <Icon type="log-in"></Icon>
-                    欢迎登录
-                </p>
-                <div class="form-con">
-                    <Form ref="loginForm" :model="form" :rules="rules">
-                        <FormItem prop="userName">
-                            <Input v-model="form.userName" placeholder="请输入用户名">
-                                <span slot="prepend">
-                                    <Icon :size="16" type="person"></Icon>
-                                </span>
-                            </Input>
-                        </FormItem>
-                        <FormItem prop="password">
-                            <Input type="password" v-model="form.password" placeholder="请输入密码">
-                                <span slot="prepend">
-                                    <Icon :size="14" type="locked"></Icon>
-                                </span>
-                            </Input>
-                        </FormItem>
-                        <FormItem>
-                            <Button @click="handleSubmit" type="primary" long>登录</Button>
-                        </FormItem>
-                    </Form>
-                    <p class="login-tip">输入任意用户名和密码即可</p>
-                </div>
-            </Card>
+  <div class="login" @keydown.enter="handleSubmit">
+    <div class="login-con">
+      <Card :bordered="false">
+        <p slot="title">
+          <Icon type="log-in"></Icon>
+          欢迎登录
+        </p>
+        <div class="form-con">
+          <Form ref="loginForm" :model="account" :rules="rules">
+            <FormItem prop="username">
+              <Input v-model="account.username" placeholder="请输入用户名">
+              <span slot="prepend">
+                       <Icon :size="16" type="person"></Icon>
+                  </span>
+              </Input>
+            </FormItem>
+            <FormItem prop="userpwd">
+              <Input type="password" v-model="account.userpwd" placeholder="请输入密码">
+              <span slot="prepend">
+                     <Icon :size="14" type="locked"></Icon>
+                  </span>
+              </Input>
+            </FormItem>
+            <FormItem>
+              <Button @click="handleSubmit" type="primary" long>登录</Button>
+            </FormItem>
+          </Form>
+          <p class="login-tip">输入任意用户名和密码即可</p>
         </div>
+      </Card>
     </div>
+  </div>
 </template>
 
 <script>
-import Cookies from 'js-cookie';
-export default {
+  import Cookies from 'js-cookie'
+
+  export default {
     data () {
-        return {
-            form: {
-                userName: 'iview_admin',
-                password: ''
-            },
-            rules: {
-                userName: [
-                    { required: true, message: '账号不能为空', trigger: 'blur' }
-                ],
-                password: [
-                    { required: true, message: '密码不能为空', trigger: 'blur' }
-                ]
-            }
-        };
+      return {
+        account: {
+          username: 'admin',
+          userpwd: '123456'
+        },
+        rules: {
+          username: [
+            {required: true, message: '账号不能为空', trigger: 'blur'}
+          ],
+          userpwd: [
+            {required: true, message: '密码不能为空', trigger: 'blur'}
+          ]
+        }
+      }
     },
     methods: {
-        handleSubmit () {
-            this.$refs.loginForm.validate((valid) => {
-                if (valid) {
-                    Cookies.set('user', this.form.userName);
-                    Cookies.set('password', this.form.password);
-                    this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
-                    if (this.form.userName === 'iview_admin') {
-                        Cookies.set('access', 0);
-                    } else {
-                        Cookies.set('access', 1);
-                    }
-                    this.$router.push({
-                        name: 'home_index'
-                    });
+      handleSubmit () {
+        this.$refs.loginForm.validate((valid) => {
+          if (valid) {
+            this.$Notice.destroy()
+            this.$http.post('/api/login', this.account)
+              .then(response => {
+                let {code, message, result} = response.data
+                if (code === 1) {
+                  this.$store.commit('login', result)
+                  /*========iview配置=======*/
+                  Cookies.set('user', this.account.username)
+                  Cookies.set('password', this.account.userpwd)
+                  this.$store.commit('setAvator', 'http://ow1prafcd.bkt.clouddn.com/hejinyo.jpg')
+                  if (this.account.username === 'admin') {
+                    Cookies.set('access', 0)
+                  } else {
+                    Cookies.set('access', 1)
+                  }
+                  /*=======END========*/
+                  this.$router.replace({
+                    path: '/home'
+                  })
+                } else {
+                  this.$Message.info(message)
                 }
-            });
-        }
+              })
+          }
+        })
+      }
     }
-};
+  }
 </script>
 
-<style>
-
+<style lang="less">
+  @import './login.less';
 </style>
+

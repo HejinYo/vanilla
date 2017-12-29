@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../../styles/common.less';
+    @import '../../assets/styles/common.less';
     @import './components/table.less';
 </style>
 
@@ -8,11 +8,11 @@
         <Row>
             <Col span="16">
                 <Card>
-                    <DragableTable 
-                        v-model="tableData" 
-                        :columns-list="columnsList" 
-                        @on-start="handleOnstart1" 
-                        @on-end="handleOnend1" 
+                    <DragableTable
+                        v-model="tableData"
+                        :columns-list="columnsList"
+                        @on-start="handleOnstart1"
+                        @on-end="handleOnend1"
                     ></DragableTable>
                 </Card>
             </Col>
@@ -44,7 +44,7 @@
                 <Card>
                     <p slot="title">
                         <Icon type="clipboard"></Icon>
-                        表格2操作记录( 点击和拖拽 )  
+                        表格2操作记录( 点击和拖拽 )
                     </p>
                     <Row style="height: 374px;">
                         <div class="dragging-tip-con">

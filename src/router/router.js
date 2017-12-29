@@ -77,6 +77,16 @@ export const appRouter = [
         ]
     },
     {
+        path: '/user',
+        icon: 'key',
+        name: 'user',
+        title: '用户管理',
+        component: Main,
+        children: [
+            { path: 'index', title: '用户管理', name: 'user_index', component: resolve => { require(['@/views/system/user.vue'], resolve); } }
+        ]
+    },
+    {
         path: '/access-test',
         icon: 'lock-combination',
         title: '权限测试页',

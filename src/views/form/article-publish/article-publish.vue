@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../../assets/styles/common.less';
     @import './article-publish.less';
 </style>
 
@@ -73,7 +73,7 @@
                         <transition name="publish-time">
                             <div v-show="editPublishTime" class="publish-time-picker-con">
                                 <div class="margin-top-10">
-                                    <DatePicker @on-change="setPublishTime" type="datetime" style="width:200px;" placeholder="选择日期和时间" ></DatePicker>                                    
+                                    <DatePicker @on-change="setPublishTime" type="datetime" style="width:200px;" placeholder="选择日期和时间" ></DatePicker>
                                 </div>
                                 <div class="margin-top-10">
                                     <Button type="primary" @click="handleSavePublishTime">确认</Button>
@@ -131,7 +131,7 @@
                         <transition name="add-new-tag">
                             <div v-show="addingNewTag" class="add-new-tag-con">
                                 <Col span="14">
-                                    <Input v-model="newTagName" placeholder="请输入标签名" />                                
+                                    <Input v-model="newTagName" placeholder="请输入标签名" />
                                 </Col>
                                 <Col span="5" class="padding-left-10">
                                     <Button @click="createNewTag" long type="primary">确定</Button>

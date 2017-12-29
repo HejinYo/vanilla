@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../../assets/styles/common.less';
     @import './count-to.less';
 </style>
 
