@@ -1,51 +1,52 @@
 <template>
   <div>
-    <div class="ibox float-e-margins">
-      <br/>
-      <!--操作工具条-->
-      <Row class="ibox-title">
-        <i-Col :xs="24" :sm="12" :md="14" :lg="16">
-          <Button type="primary" @click="openSave"><i class="fa fa-plus fa-fw"></i>添加</Button>
-          <Button type="primary" @click="openEdit" :disabled="showEdit"><i class="fa fa-edit fa-fw"></i>修改</Button>
-          <Button type="error" @click="openDelete" :disabled="showDelete"><i class="fa fa-trash-o fa-fw"></i>删除</Button>
-        </i-Col>
+    <div>
+      <Card>
+        <p slot="title">
+          <Icon type="person-stalker"></Icon>
+          用户管理
+        </p>
+        <!--操作工具条-->
+        <Row>
+          <i-Col :xs="24" :sm="12" :md="14" :lg="16">
+            <Button type="primary" @click="openSave"><i class="fa fa-plus fa-fw"></i>添加</Button>
+            <!--<Button type="primary" @click="openEdit" :disabled="showEdit"><i class="fa fa-edit fa-fw"></i>修改</Button>-->
+            <Button type="error" @click="openDelete" :disabled="showDelete"><i class="fa fa-trash-o fa-fw"></i>删除</Button>
+          </i-Col>
 
-        <i-Col :xs="24" :sm="12" :md="10" :lg="8">
-          <i-Input v-model="pagePara.queryStr" @on-enter="searchUser" placeholder="查询..." :maxlength="32">
-            <Select v-model="pagePara.queryCol" @on-change="searchUser" slot="prepend" style="width: 80px">
-              <Option value="userName">用户名</Option>
-              <Option value="phone">电话</Option>
-              <Option value="email">邮箱</Option>
-            </Select>
-            <Button type="primary" slot="append" @click="searchUser"><i class="fa fa-search"></i></Button>
-            <Button type="error" slot="append" @click="searchRset">重置</Button>
-          </i-Input>
-        </i-Col>
-
-      </Row>
-      <br/>
-      <!-- 表格 -->
-      <div class="ibox-content">
-        <div class="row">
-          <div class="col-lg-12">
-            <Table border stripe highlight-row ref="selection" :columns="user_columns" :data="userList"></Table>
-          </div>
-          <div class="col-lg-12">
-            <br/>
-            <!--翻页工具条-->
-            <Page show-elevator show-total show-sizer size="small" placement="top"
-                  :total="pagePara.total"
-                  :page-size-opts="[10, 20, 50, 100]"
-                  @on-change="currentChange"
-                  @on-page-size-change="sizeChange">
-            </Page>
-          </div>
+          <i-Col :xs="24" :sm="12" :md="10" :lg="8">
+            <i-Input v-model="pagePara.queryStr" @on-enter="searchUser" placeholder="查询..." :maxlength="32">
+              <Select v-model="pagePara.queryCol" @on-change="searchUser" slot="prepend" style="width: 80px">
+                <Option value="userName">用户名</Option>
+                <Option value="phone">电话</Option>
+                <Option value="email">邮箱</Option>
+              </Select>
+              <Button type="primary" slot="append" @click="searchUser">
+                <Icon type="ios-search-strong"></Icon>
+              </Button>
+              <Button type="error" slot="append" @click="searchRset">重置</Button>
+            </i-Input>
+          </i-Col>
+        </Row>
+        <br/>
+        <div>
+          <!-- 表格 -->
+          <Table border stripe highlight-row ref="selection" :columns="user_columns" :data="userList" :loading="listLoading"
+                 @on-row-dblclick="openColEdit" @on-selection-change="selectionRow" @on-sort-change="sortChange"
+          ></Table>
+          <br/>
+          <!--翻页工具条-->
+          <Page show-elevator show-total show-sizer size="small" placement="top"
+                :total="pagePara.total"
+                :page-size-opts="[10, 20, 50, 100]"
+                @on-change="currentChange"
+                @on-page-size-change="sizeChange">
+          </Page>
         </div>
-      </div>
-
+      </Card>
     </div>
 
-    <Modal :transfer="true" :mask-closable="false" v-model="addFormVisible" class-name="vertical-center-modal" title="添加用户">
+    <Modal :mask-closable="false" v-model="addFormVisible" class-name="vertical-center-modal" title="添加用户">
       <Form ref="addUserForm" :model="addUserForm" :rules="addUserRules" :label-width="80">
         <FormItem label="角色" prop="roleId" :required="true">
           <Select v-model="addUserForm.roleId">
@@ -75,7 +76,7 @@
       </div>
     </Modal>
 
-    <Modal :transfer="false" :mask-closable="false" v-model="editFormVisible" title="编辑用户">
+    <Modal :mask-closable="false" v-model="editFormVisible" class-name="vertical-center-modal" title="编辑用户">
       <Form ref="editUserForm" :model="editUserForm" :rules="addUserRules" :label-width="80">
         <FormItem label="用户名" prop="userName">
           <Input v-model="editUserForm.userName" placeholder="请输入用户名"/>
@@ -102,7 +103,7 @@
         </FormItem>
         <FormItem label="登录时间">
           <FormItem prop="date">
-            <DatePicker type="date" placeholder="选择日期" v-model="editUserForm.loginTime"></DatePicker>
+            <DatePicker type="datetime" placeholder="选择日期" v-model="editUserForm.loginTime"></DatePicker>
           </FormItem>
         </FormItem>
       </Form>
@@ -118,7 +119,7 @@
 <script>
   export default {
     name: 'sysUser',
-    data () {
+    data() {
       const validatePhone = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('请输入手机号码'))
@@ -148,19 +149,22 @@
             title: '姓名',
             key: 'userName',
             width: 200,
-            align: 'center'
+            align: 'center',
+            sortable: 'custom'
           },
           {
             title: '电话',
             key: 'phone',
-            width: 150,
-            align: 'center'
+            width: 120,
+            align: 'center',
+            sortable: 'custom'
           },
           {
             title: '邮箱',
             key: 'email',
             width: 180,
-            align: 'center'
+            align: 'center',
+            sortable: 'custom'
           },
           {
             title: '角色',
@@ -169,25 +173,27 @@
               return h('div', [
                 h('Tag', {
                   props: {
-                    color: params.row.roleId === 1 ? 'red' : '#EF6AFF',
+                    color: params.row.roleId === 1 ? 'blue' : '#66cdff',
                     size: 'small',
                   }
-                }, params.row.roleName !== null ? params.row.roleName : '无')
+                }, params.row.roleId > 0 ? params.row.roleName : '无角色')
               ])
             },
             width: 100,
-            align: 'center'
+            align: 'center',
+            sortable: 'custom'
           },
           {
             title: '状态',
             key: 'state',
             align: 'center',
+            sortable: 'custom',
             width: 90,
             render: (h, params) => {
               return h('div', [
                 h('Tag', {
                   props: {
-                    color: params.row.state === 1 ? 'green' : 'yellow',
+                    color: params.row.state === 1 ? 'green' : 'red',
                     size: 'small',
                   }
                 }, params.row.state === 1 ? '正常' : '禁用')
@@ -197,20 +203,23 @@
           {
             title: '登录IP',
             key: 'loginIp',
-            width: 180,
-            align: 'center'
+            width: 120,
+            align: 'center',
+            sortable: 'custom'
           },
           {
             title: '登录时间',
             key: 'loginTime',
-            width: 180,
-            align: 'center'
+            width: 160,
+            align: 'center',
+            sortable: 'custom'
           },
           {
             title: '创建日期',
             key: 'createTime',
-            width: 180,
-            align: 'center'
+            width: 160,
+            align: 'center',
+            sortable: 'custom'
           },
           {
             title: '操作',
@@ -229,10 +238,10 @@
                   },
                   on: {
                     click: () => {
-                      this.show(params.index)
+                      this.openColEdit(params.row)
                     }
                   }
-                }, 'View'),
+                }, '修改'),
                 h('Button', {
                   props: {
                     type: 'error',
@@ -240,10 +249,10 @@
                   },
                   on: {
                     click: () => {
-                      this.remove(params.index)
+                      this.doColDelete(params.row)
                     }
                   }
-                }, 'Delete')
+                }, '删除')
               ])
             }
           }
@@ -295,11 +304,11 @@
     }
     ,
     computed: {
-      showDelete () {
-        return this.secol === null && this.selist.length === 0
+      showDelete() {
+        return this.selist.length === 0
       }
       ,
-      showEdit () {
+      showEdit() {
         return this.secol === null
       }
     }
@@ -313,7 +322,7 @@
     ,
     methods: {
       //加载用户列表
-      getUserList () {
+      getUserList() {
         this.listLoading = true
         this.$http.get('/api/user/listPage' +
           '?pageNum=' + this.pagePara.page +
@@ -337,7 +346,7 @@
       }
       ,
       //获取角色数据
-      getRoleSelect () {
+      getRoleSelect() {
         this.listLoading = true
         this.$http.get('/api/role/select')
           .then(response => {
@@ -348,13 +357,13 @@
       }
       ,
       //点击页码事件，翻页操作
-      currentChange (val) {
+      currentChange(val) {
         this.pagePara.page = val
         this.getUserList()
       }
       ,
       //改变分页数量
-      sizeChange (val) {
+      sizeChange(val) {
         this.pagePara.pageSize = val
         this.getUserList()
       }
@@ -366,7 +375,7 @@
       }
       ,
       //执行增加操作
-      doSave () {
+      doSave() {
         let _this = this
         this.$refs['addUserForm'].validate((valid) => {
           if (valid) {
@@ -388,7 +397,7 @@
       }
       ,
       //打开编辑用户面板
-      openEdit () {
+      openEdit() {
         if (null !== this.secol) {
           this.resetForm('editUserForm')
           this.editFormVisible = true
@@ -397,13 +406,13 @@
       }
       ,
       //表格内打开编辑用户
-      openColEdit (row) {
+      openColEdit(row) {
         this.secol = row
         this.openEdit()
       }
       ,
       //执行更新操作
-      doUpdate () {
+      doUpdate() {
         let _this = this
         this.$refs['editUserForm'].validate((valid) => {
           if (valid) {
@@ -434,13 +443,13 @@
       }
       ,
       //执行表格内删除用户
-      doColDelete (row) {
+      doColDelete(row) {
         this.secol = row
         this.doDelete()
       }
       ,
       //删除
-      openDelete () {
+      openDelete() {
         let _this = this
         if (this.selist.length > 0) {
           _this.delBatch()
@@ -450,7 +459,7 @@
       }
       ,
       //执行单个删除操作
-      doDelete () {
+      doDelete() {
         let _this = this
         if (null !== this.secol) {
           this.$Modal.confirm({
@@ -474,7 +483,7 @@
         }
       }
       ,
-      delBatch () {
+      delBatch() {
         let _this = this
         if (this.selist.length > 0) {
           this.$Modal.confirm({
@@ -503,37 +512,42 @@
       }
       ,
       //点击表格行事件
-      currentRow (val) {
+      currentRow(val, index) {
+        console.log(val);
+        console.log(index);
         this.secol = val
       }
       ,
       //多选事件
-      selectionRow (val) {
+      selectionRow(val) {
         this.selist = val
       }
       ,
       //排序
-      sortChange (val) {
-        this.pagePara.sidx = val.prop
-        this.pagePara.sort = val.order
-        this.getUserList()
-      }
-      ,
+      sortChange(val) {
+        if (val.order === 'normal') {
+          this.pagePara.sidx = '';
+        } else {
+          this.pagePara.sidx = val.key;
+          this.pagePara.sort = val.order;
+        }
+        this.getUserList();
+      },
       //查询
-      searchUser () {
+      searchUser() {
         if (this.pagePara.queryStr !== '') {
           this.getUserList()
         }
       }
       ,
       //查询重置
-      searchRset () {
+      searchRset() {
         this.pagePara.queryStr = ''
         this.getUserList()
       }
       ,
       //重置表格
-      resetForm (formName) {
+      resetForm(formName) {
         this.$refs[formName].resetFields()
       }
     }
@@ -549,4 +563,16 @@
       top: 0;
     }
   }
+
+  .ivu-table td.demo-table-info-column {
+    color: #ff1f31;
+    min-width: 180px;
+  }
+
+  .demo-table-info-column div {
+    min-width: 180px;
+  }
+
+
 </style>
+
