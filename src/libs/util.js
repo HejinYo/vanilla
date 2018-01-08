@@ -1,11 +1,12 @@
 import axios from 'axios'
 import semver from 'semver'
+import { otherRouter, appRouter } from '@/router/router'
 
 let util = {}
 
 /*修改窗口标题*/
 util.title = function (title) {
-  title = title || 'iView admin'
+  title = title || 'vanilla admin'
   window.document.title = title
 }
 
@@ -26,6 +27,7 @@ util.inOf = function (arr, targetArr) {
   return res
 }
 
+//是否在数组当中
 util.oneOf = function (ele, targetArr) {
   if (targetArr.indexOf(ele) >= 0) {
     return true
@@ -243,7 +245,7 @@ util.toDefaultPage = function (routers, name, route, next) {
 util.fullscreenEvent = function (vm) {
   vm.$store.commit('initCachepage')
   // 权限菜单过滤相关
-  vm.$store.commit('updateMenulist')
+  //vm.$store.commit('updateMenulist')
   // 全屏相关
 }
 
@@ -257,6 +259,15 @@ util.checkUpdate = function (vm) {
       duration: 10
     })
   })
+}
+
+util.getMenuAuth = function (menuAuth, name) {
+  for (let item of menuAuth) {
+    if (item.redCode === name) {
+      return item
+    }
+  }
+  return null
 }
 
 export default util

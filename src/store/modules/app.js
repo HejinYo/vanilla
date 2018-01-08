@@ -1,11 +1,10 @@
 import { otherRouter, appRouter } from '@/router/router'
 import Util from '@/libs/util'
-import Cookies from 'js-cookie'
 import Vue from 'vue'
 
 const app = {
   state: {
-    loginUser: {},
+    count: 1,
     cachePage: [],
     lang: '',
     isFullScreen: false,
@@ -35,60 +34,27 @@ const app = {
     dontCache: ['text-editor', 'artical-publish'] // 在这里定义你不想要缓存的页面的name属性值(参见路由配置router.js)
   },
   mutations: {
-    /* 登录设置状态 */
-    login (state, data) {
-      state.loginUser = data
-      localStorage.loginUser = JSON.stringify(data)
-      localStorage.userToken = data.userToken
+    increment (state) {
+      state.count++
+    },
+    decrement (state) {
+      state.count--
+    },
+    //清除所有数据
+    cleanAll (state) {
+      state.pageOpenedList.splice(1)
+      state.cachePage.length = 0
+      localStorage.pageOpenedList = JSON.stringify(state.pageOpenedList)
+      state.openedSubmenuArr.length = 0
+      state.messageCount = 0
+      state.menuList.length = 0
     },
     setTagsList (state, list) {
       state.tagsList.push(...list)
     },
-    updateMenulist (state) {
-      let accessCode = parseInt(Cookies.get('access'))
-      let menuList = []
-      appRouter.forEach((item, index) => {
-        if (item.access !== undefined) {
-          if (Util.showThisRoute(item.access, accessCode)) {
-            if (item.children.length === 1) {
-              menuList.push(item)
-            } else {
-              let len = menuList.push(item)
-              let childrenArr = []
-              childrenArr = item.children.filter(child => {
-                if (child.access !== undefined) {
-                  if (child.access === accessCode) {
-                    return child
-                  }
-                } else {
-                  return child
-                }
-              })
-              menuList[len - 1].children = childrenArr
-            }
-          }
-        } else {
-          if (item.children.length === 1) {
-            menuList.push(item)
-          } else {
-            let len = menuList.push(item)
-            let childrenArr = []
-            childrenArr = item.children.filter(child => {
-              if (child.access !== undefined) {
-                if (Util.showThisRoute(child.access, accessCode)) {
-                  return child
-                }
-              } else {
-                return child
-              }
-            })
-            let handledItem = JSON.parse(JSON.stringify(menuList[len - 1]))
-            handledItem.children = childrenArr
-            menuList.splice(len - 1, 1, handledItem)
-          }
-        }
-      })
-      state.menuList = menuList
+    //设置菜单
+    setMenuList (state, data) {
+      state.menuList = data
     },
     changeMenuTheme (state, theme) {
       state.menuTheme = theme
@@ -116,6 +82,7 @@ const app = {
         }
       })
     },
+    //缓存页面
     initCachepage (state) {
       if (localStorage.cachePage) {
         state.cachePage = JSON.parse(localStorage.cachePage)
@@ -158,12 +125,12 @@ const app = {
         state.pageOpenedList.splice(currentIndex + 1)
         state.pageOpenedList.splice(1, currentIndex - 1)
       }
-      let newCachepage = state.cachePage.filter(item => {
+      state.cachePage = state.cachePage.filter(item => {
         return item === currentName
       })
-      state.cachePage = newCachepage
       localStorage.pageOpenedList = JSON.stringify(state.pageOpenedList)
     },
+    //设置页面打开列表
     setOpenedList (state) {
       state.pageOpenedList = localStorage.pageOpenedList ? JSON.parse(localStorage.pageOpenedList) : [otherRouter.children[0]]
     },
@@ -173,7 +140,7 @@ const app = {
     setCurrentPageName (state, name) {
       state.currentPageName = name
     },
-    /*设置用户头像*/
+    //设置用户头像
     setAvator (state, path) {
       localStorage.avatorImgPath = path
     },
@@ -195,7 +162,21 @@ const app = {
       state.pageOpenedList.push(tagObj)
       localStorage.pageOpenedList = JSON.stringify(state.pageOpenedList)
     }
+  },
+  actions: {
+    increment: ({commit}) => {//执行多个 mutations 就需要用 action ,可以在这里触发其他的mutations方法
+      commit('increment')
+    },
+    decrement: ({commit}) => {//执行多个 mutations 就需要用 action ,可以在这里触发其他的mutations方法
+      commit('decrement')
+    }
+  },
+  getters: {
+    count: state => {//相当于计算属性，可以自定义state所相关的属性，比如取反
+      return state.count
+    }
   }
+
 }
 
 export default app

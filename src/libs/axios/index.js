@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { router } from '../../router'
 import Message from 'iview/src/components/message'
 import Notice from 'iview/src/components/notice'
 
@@ -10,9 +11,9 @@ axios.interceptors.request.use(
       config.headers['Authorization'] = userToken
     }
     if (config.method === 'post') {
-      config.data = {
+      /*config.data = {
         ...config.data
-      }
+      }*/
     } else if (config.method === 'get') {
       config.params = {
         _t: Date.parse(new Date()) / 1000,

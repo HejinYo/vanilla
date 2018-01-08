@@ -26,7 +26,7 @@
               <Button @click="handleSubmit" type="primary" long>登录</Button>
             </FormItem>
           </Form>
-          <p class="login-tip">输入任意用户名和密码即可</p>
+          <p class="login-tip">输入正确的用户名和密码即可</p>
         </div>
       </Card>
     </div>
@@ -40,7 +40,7 @@
     data () {
       return {
         account: {
-          username: 'admin',
+          username: 'hejinyo',
           userpwd: '123456'
         },
         rules: {
@@ -63,18 +63,11 @@
                 let {code, message, result} = response.data
                 if (code === 1) {
                   this.$store.commit('login', result)
-                  /*========iview配置=======*/
                   Cookies.set('user', this.account.username)
                   Cookies.set('password', this.account.userpwd)
                   this.$store.commit('setAvator', 'http://ow1prafcd.bkt.clouddn.com/hejinyo.jpg')
-                  if (this.account.username === 'admin') {
-                    Cookies.set('access', 0)
-                  } else {
-                    Cookies.set('access', 1)
-                  }
-                  /*=======END========*/
                   this.$router.replace({
-                    path: '/home'
+                    path: decodeURIComponent(this.$route.query.redirect || '/home')
                   })
                 } else {
                   this.$Message.info(message)
@@ -83,6 +76,8 @@
           }
         })
       }
+    },
+    mounted () {
     }
   }
 </script>

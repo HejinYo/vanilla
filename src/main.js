@@ -9,10 +9,16 @@ import 'iview/dist/styles/iview.css'
 import VueI18n from 'vue-i18n'
 import util from '@/libs/util'
 import axios from '@/libs/axios'
+import { Tree, Checkbox, Table, TableColumn, Loading } from 'element-ui'
 
 Vue.use(VueI18n)
 Vue.use(iView)
 Vue.prototype.$http = axios
+Vue.use(Tree)
+Vue.use(Checkbox)
+Vue.use(Table)
+Vue.use(TableColumn)
+Vue.use(Loading.directive)
 
 new Vue({
   el: '#app',
@@ -28,9 +34,9 @@ new Vue({
     this.$store.commit('setOpenedList')
     this.$store.commit('initCachepage')
     // 权限菜单过滤相关
-    this.$store.commit('updateMenulist')
+    //this.$store.commit('updateMenulist')
     // iview-admin检查更新
-    util.checkUpdate(this)
+    //util.checkUpdate(this)
   },
   created () {
     let tagsList = []
