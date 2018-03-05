@@ -60,14 +60,15 @@
             this.$Notice.destroy()
             this.$http.post('/api/login', this.account)
               .then(response => {
-                let {code, message, result} = response.data
-                if (code === 1) {
+                let {code, msg, result} = response.data
+                if (code === 0) {
                   this.$store.commit('login', result)
                   Cookies.set('user', this.account.username)
                   Cookies.set('password', this.account.userpwd)
                   this.$store.commit('setAvator', 'http://ow1prafcd.bkt.clouddn.com/hejinyo.jpg')
                   this.$router.replace({
-                    path: decodeURIComponent(this.$route.query.redirect || '/home')
+                    //path: decodeURIComponent(this.$route.query.redirect || '/home')
+                    path: decodeURIComponent('/home')
                   })
                 } else {
                   this.$Message.info(message)

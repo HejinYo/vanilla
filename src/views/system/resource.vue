@@ -3,32 +3,13 @@
     <Row>
       <i-Col :xs="24" :sm="10" :md="10" :lg="6">
         <Card :padding="10">
-          <div slot="title">
+          <p slot="title">
+            <Icon type="briefcase"></Icon>
             资源管理
-          </div>
-          <!-- <a href="#" slot="extra" type="primary" @click.prevent="resetData">
-             <Icon type="refresh"></Icon>
-             重置
-           </a>-->
-          <!-- <Tree :data="treeData" :render="renderContent"></Tree>-->
-
-          <i-Input v-model="filterText" style="padding:0px 30px 5px 10px "
-                   placeholder="输入关键字进行过滤"
-                   icon="ios-clock-outline">
-            <Button slot="append" icon="ios-close" @click.prevent="filterText=''"></Button>
-          </i-Input>
-          <el-tree
-            :data="treeData"
-            node-key="resId"
-            :default-expanded-keys="resTreeExpandedKeys"
-            :expand-on-click-node="false"
-            :render-content="renderContent"
-            accordion highlight-current
-            :filter-node-method="filterNode"
-            ref="resTree"
-            :indent="20"
-          >
-          </el-tree>
+          </p>
+          <edit-tree :data="resTreeData" :expandedKeys="resTreeExpandedKeys"
+                     label="resName" value="resId" nodeKey="resId" icon="resIcon"
+                     @treeClick="treeDataChange" @treeAdd="resTreeAdd" @treeDel="doDelRes"></edit-tree>
         </Card>
       </i-Col>
 
@@ -37,16 +18,28 @@
           <Card>
             <Tabs v-model="currTabs" @on-click="tabsChange">
               <TabPane label="资源管理" name="resource" icon="folder">
-                <!-- 表格 -->
-                <!-- <Table border stripe highlight-row ref="selection" :loading="resLoading"
-                        :columns="resColumns" :data="resList"
-                        @on-sort-change="resSortChange " @on-row-dblclick="editRes"
-                 ></Table>-->
-
-                <el-table :data="resList" stripe border highlight-current-row v-loading="resLoading" size="mini"
-                          @row-dblclick="editRes"
-                          @sort-change="resSortChange">
-                  <el-table-column prop="resId" label="编号" align="center" width="70"></el-table-column>
+                <!--操作工具条-->
+                <Row>
+                  <i-Col :xs="24" :sm="12" :md="14" :lg="16">
+                    <Button type="primary" icon="edit" :disabled="resShowEdit" @click="resOpenEdit">修改</Button>
+                  </i-Col>
+                  <i-Col :xs="24" :sm="12" :md="10" :lg="8">
+                    <i-Input v-model="resPageQuery.queryValue" @on-enter="search" placeholder="查询..." :maxlength="32" clearable>
+                      <Select v-model="resPageQuery.queryKey" @on-change="search" slot="prepend" style="width: 80px">
+                        <Option value="resName">资源名称</Option>
+                        <Option value="resCode">资源编码</Option>
+                      </Select>
+                      <Button type="primary" slot="append" @click="search">
+                        <Icon type="ios-search-strong"></Icon>
+                      </Button>
+                      <Button type="error" slot="append" @click="searchRset">重置</Button>
+                    </i-Input>
+                  </i-Col>
+                </Row>
+                <br/>
+                <el-table :data="resList" stripe border highlight-current-row v-loading="resLoading" size="mini" element-loading-text="拼命加载中"
+                          @row-click="resClickRow" @row-dblclick="resOpenEdit" @sort-change="resSortChange">
+                  <el-table-column prop="resId" label="ID" sortable="custom" width="60"></el-table-column>
                   <el-table-column prop="resType" label="类型" sortable="custom" align="center" width="90">
                     <template slot-scope="scope">
                       <Tag :color="scope.row.resType == 'menu' ? 'green': 'yellow' ">
@@ -59,7 +52,7 @@
                   <el-table-column prop="resPname" label="上级资源" sortable="custom" align="center" width="130"></el-table-column>
                   <el-table-column prop="resLevel" label="级别" sortable="custom" align="center" width="90">
                     <template slot-scope="scope">
-                      <Tag :color="scope.row.resLevel != 1 ? scope.row.resLevel == 2 ? 'yellow': scope.row.resLevel == 3 ? 'green': '' : 'red' ">
+                      <Tag :color="scope.row.resLevel != 1 ? scope.row.resLevel == 2 ? 'yellow': scope.row.resLevel == 3 ? 'green': 'blue' : 'red' ">
                         {{scope.row.resLevel}} 级
                       </Tag>
                     </template>
@@ -83,8 +76,8 @@
                 </el-table>
                 <br/>
                 <!--翻页工具条-->
-                <Page show-elevator show-total show-sizer size="small" placement="top" v-if="resPagePara.total > 1"
-                      :total="resPagePara.total"
+                <Page show-elevator show-total show-sizer size="small" placement="top" v-if="resPageParam.total > 0"
+                      :total="resPageParam.total" :current="resPageParam.pageNum"
                       :page-size-opts="[10, 20, 50, 100]"
                       @on-change="resPageChange"
                       @on-page-size-change="resSizeChange">
@@ -92,13 +85,29 @@
               </TabPane>
 
               <TabPane label="权限管理" name="permission" icon="key">
-                <!-- 表格 -->
-                <!--     <Table border stripe highlight-row ref="selection" :loading="permLoading"
-                            :columns="permColumns" :data="permList"
-                            @on-row-dblclick="editPerm" @on-sort-change="permSortChange"></Table>-->
-
-                <el-table :data="permList" stripe border highlight-current-row v-loading="permLoading" size="mini"
-                          @sort-change="permSortChange" @cell-dblclick="editPerm">
+                <!--操作工具条-->
+                <Row>
+                  <i-Col :xs="24" :sm="12" :md="14" :lg="16">
+                    <Button type="primary" icon="edit" :disabled="permShowEdit" @click="permOpenEdit">修改</Button>
+                    <Button type="error" icon="android-delete" :disabled="permShowEdit" @click="doDelPerm">删除</Button>
+                  </i-Col>
+                  <i-Col :xs="24" :sm="12" :md="10" :lg="8">
+                    <i-Input v-model="permPageQuery.queryValue" @on-enter="search" placeholder="查询..." :maxlength="32" clearable>
+                      <Select v-model="permPageQuery.queryKey" @on-change="search" slot="prepend" style="width: 80px">
+                        <Option value="permName">权限名称</Option>
+                        <Option value="resCode">资源编码</Option>
+                        <Option value="permCode">资源编码</Option>
+                      </Select>
+                      <Button type="primary" slot="append" @click="search">
+                        <Icon type="ios-search-strong"></Icon>
+                      </Button>
+                      <Button type="error" slot="append" @click="searchRset">重置</Button>
+                    </i-Input>
+                  </i-Col>
+                </Row>
+                <br/>
+                <el-table :data="permList" stripe border highlight-current-row v-loading="permLoading" size="mini" element-loading-text="拼命加载中"
+                          @row-click="permClickRow" @row-dblclick="permOpenEdit" @sort-change="permSortChange">
                   <el-table-column prop="permId" label="编号" align="center" width="70"></el-table-column>
                   <el-table-column prop="permName" label="权限名称" sortable="custom" align="center" width="150"></el-table-column>
                   <el-table-column prop="resCode" label="资源编码" sortable="custom" align="center" width="150"></el-table-column>
@@ -112,21 +121,11 @@
                     </template>
                   </el-table-column>
                   <el-table-column prop="createTime" label="创建日期" align="center" min-width="180"></el-table-column>
-                  <el-table-column label="操作" align="center" width="120">
-                    <template slot-scope="scope">
-                      <Button type="primary" size="small" @click="editPerm(scope.row)">
-                        修改
-                      </Button>
-                      <Button type="error" size="small" @click="doDelPerm(scope.row)">
-                        删除
-                      </Button>
-                    </template>
-                  </el-table-column>
                 </el-table>
                 <br/>
                 <!--翻页工具条-->
-                <Page show-elevator show-total show-sizer size="small" placement="top" v-if="permPagePara.total > 1"
-                      :total="permPagePara.total"
+                <Page show-elevator show-total show-sizer size="small" placement="top" v-if="permPageParam.total > 0"
+                      :total="permPageParam.total" :current="permPageParam.pageNum"
                       :page-size-opts="[10, 20, 50, 100]"
                       @on-change="permPageChange"
                       @on-page-size-change="permSizeChange">
@@ -137,65 +136,44 @@
         </div>
       </i-Col>
     </Row>
-
-    <Modal :transfer="false" :mask-closable="false" v-model="resVisible" :title="resOpName.show" class-name="vertical-center-modal">
-      <Form ref="resFrom" :model="resFrom" :rules="resValidate" :label-width="80">
-        <FormItem label="上级资源" prop="resPname">
-          <i-Input v-model="resFrom.resPname" placeholder="请选择" readonly>
-            <Poptip placement="bottom-end" slot="append">
-              <Button type="ghost">选择上级</Button>
-              <div slot="content">
-                <Card :padding="0" :bordered="false" :dis-hover="true">
-                  <!-- <Tree style="border:none;text-align: left;" :data="dropTree" @on-select-change="resTreeChange"></Tree>-->
-                  <el-tree style="border:none;text-align: left;"
-                           :data="dropTree"
-                           node-key="resId"
-                           :default-expanded-keys="[0]"
-                           :expand-on-click-node="true"
-                           :props="dropTreeProps"
-                           @node-click="resTreeChange"
-                           accordion highlight-current
-                  >
-                  </el-tree>
-                </Card>
-              </div>
-            </Poptip>
-
-          </i-Input>
+    <Modal :mask-closable="false" v-model="resVisible" :title="resShowOpsType">
+      <Form ref="sysResource" :model="sysResource" :rules="resValidate" :label-width="80">
+        <FormItem label="上级资源" prop="resPid">
+          <res-select :resId="sysResource.resPid" @resChange="resSelectChange" :rootNode="true" :refresh="true"></res-select>
         </FormItem>
         <FormItem label="资源类型" prop="resType">
-          <RadioGroup v-model="resFrom.resType">
+          <RadioGroup v-model="sysResource.resType">
             <Radio label="menu">菜单</Radio>
             <Radio label="file">文件</Radio>
           </RadioGroup>
         </FormItem>
         <FormItem label="资源名称" prop="resName">
-          <Input v-model="resFrom.resName" placeholder="请输入"/>
+          <Input v-model="sysResource.resName" placeholder="请输入"/>
         </FormItem>
         <FormItem label="资源编码" prop="resCode">
-          <Input v-model="resFrom.resCode" placeholder="请输入"/>
+          <Input v-model="sysResource.resCode" placeholder="请输入"/>
         </FormItem>
-        <FormItem label="资源图标" prop="resIcon">
-          <i-Input v-model="resFrom.resIcon" placeholder="请输入">
+        <FormItem label="资源图标：" prop="resIcon">
+          <i-Input v-model="sysResource.resIcon" placeholder="请输入">
             <Poptip placement="right" slot="prepend">
               <Button type="ghost">
-                <Icon :type="resFrom.resIcon" :size="14"></Icon>
+                <Icon :type="sysResource.resIcon" :size="15"></Icon>
               </Button>
-              <div slot="content">
-                <iframe src="http://fontawesome.dashgame.com/" width="350px" height="400px"></iframe>
+              <div slot="content" style="height:200px">
+                <icon-select @selectIcon="selectIcon"></icon-select>
               </div>
             </Poptip>
           </i-Input>
         </FormItem>
         <FormItem label="资源级别" prop="resLevel">
-          <Rate disabled v-model="resFrom.resLevel" :count="3"></Rate>
-          {{resFrom.resLevel}}级
+          <Rate disabled v-model="sysResource.resLevel" :count="3"></Rate>
+          {{addResFrom.resLevel}}级
         </FormItem>
         <FormItem label="排序号" prop="seq">
-          <InputNumber :max="100" :min="1" v-model="resFrom.seq"></InputNumber>
+          <InputNumber :max="100" :min="1" v-model="sysResource.seq"></InputNumber>
         </FormItem>
         <FormItem label="状态" prop="state">
-          <i-switch v-model="resFrom.state" size="large" :true-value="1" :false-value="0">
+          <i-switch v-model="sysResource.state" size="large" :true-value="1" :false-value="0">
             <span slot="open">启用</span>
             <span slot="close">禁用</span>
           </i-switch>
@@ -207,37 +185,18 @@
       </div>
     </Modal>
 
-    <Modal :transfer="false" :mask-closable="false" v-model="permVisible" :title="permOpName.show" class-name="vertical-center-modal">
-      <Form ref="permFrom" :model="permFrom" :rules="permValidate" :label-width="80">
-        <FormItem label="资源编码" prop="resCode">
-          <i-Input v-model="permFrom.resCode" placeholder="请选择" readonly>
-            <Poptip placement="bottom-end" slot="append">
-              <Button type="ghost">选择</Button>
-              <div slot="content">
-                <Card :padding="0" :bordered="false" :dis-hover="true">
-                  <!-- <Tree style="border:none;text-align: left;" :data="dropTree" @on-select-change="permTreeChange"></Tree>-->
-                  <el-tree
-                    :data="resTreeData"
-                    node-key="resId"
-                    :default-expanded-keys="[0]"
-                    :expand-on-click-node="true"
-                    :props="dropTreeProps"
-                    @node-click="permTreeChange"
-                    accordion highlight-current
-                  >
-                  </el-tree>
-                </Card>
-              </div>
-            </Poptip>
-          </i-Input>
+    <Modal :mask-closable="false" v-model="permVisible" :title="permShowOpsType">
+      <Form ref="sysPermission" :model="sysPermission" :rules="permValidate" :label-width="80">
+        <FormItem label="所属资源" prop="resId">
+          <res-select :resId="sysPermission.resId" @resChange="permSelectChange" :refresh="true"></res-select>
         </FormItem>
         <FormItem label="权限名称" prop="permName">
-          <Input v-model="permFrom.permName" placeholder="请输入"/>
+          <Input v-model="sysPermission.permName" placeholder="请输入"/>
         </FormItem>
         <FormItem label="权限编码" prop="permCode">
           <AutoComplete
             @on-select="permCodeSelect"
-            v-model="permFrom.permCode"
+            v-model="sysPermission.permCode"
             icon="ios-search"
             placeholder="请输入">
             <Option v-for="option in permission" :value="option.value" :key="option.value">
@@ -247,10 +206,10 @@
           </AutoComplete>
         </FormItem>
         <FormItem label="URL" prop="permUrl">
-          <Input v-model="permFrom.permUrl" placeholder="请输入"/>
+          <Input v-model="sysPermission.permUrl" placeholder="请输入"/>
         </FormItem>
         <FormItem label="状态" prop="state">
-          <i-switch v-model="permFrom.state" size="large" :true-value="1" :false-value="0">
+          <i-switch v-model="sysPermission.state" size="large" :true-value="1" :false-value="0">
             <span slot="open">启用</span>
             <span slot="close">禁用</span>
           </i-switch>
@@ -266,41 +225,90 @@
 
 </template>
 <script>
+  import editTree from '@/components/editTree'
+  import iconSelect from '@/components/iconSelect'
+  import resSelect from '@/components/resSelect'
+
   export default {
     name: 'resource',
+    components: {
+      'edit-tree': editTree,
+      'icon-select': iconSelect,
+      'res-select': resSelect,
+    },
+    computed: {
+      resShowEdit () {
+        return this.resCurrCol === null
+      },
+      resShowOpsType () {
+        return this.resOpsType === 0 ? '添加资源' : '编辑资源'
+      },
+      permShowEdit () {
+        return this.permCurrCol === null
+      },
+      permShowOpsType () {
+        return this.permOpsType === 0 ? '添加权限' : '编辑权限'
+      }
+    },
     data () {
       return {
-        filterText: '',
+        //资源树数据
+        resTreeData: [],
         //资源树当前节点
         currNode: {},
+        //资源树查询
+        filterText: '',
+        //资源树默认展开节点
         resTreeExpandedKeys: [0],
-        /*************资源START*************/
-        resLoading: false,
-        resOpName: {show: '', save: '添加资源', update: '修改资源'},
+        //查询参数
+        queryParam: {
+          resId: null,
+          resCode: null
+        },
+        //当前table页
+        currTabs: 'resource',
         //资源表格数据
         resList: [],
-        //分页查询参数
-        resPagePara: {
+        resLoading: false,
+        //资源分页查询参数
+        resPageParam: {
           total: 0,
-          page: 1,
+          pageNum: 1,
           pageSize: 10,
-          sidx: 'resLevel,resPid,seq',
-          sort: 'asc',
-          queryCol: '',
-          queryStr: ''
+          sidx: null,
+          sort: null
         },
-        resOpsType: 'save',
+        //资源查询参数
+        resPageQuery: {
+          queryKey: 'resName',
+          queryValue: null
+        },
+        //资源当前选择行
+        resCurrCol: null,
+        //资源操作类型
+        resOpsType: 0,
         resVisible: false,
-        resFrom: {
-          'resPid': 0,
-          'resPname': '',
-          'resType': 'menu',
-          'resName': '',
-          'resCode': '',
-          'resLevel': 1,
-          'resIcon': 'grid',
-          'seq': 1,
-          'state': 1
+        sysResource: {
+          resPid: null,
+          resPname: null,
+          resType: null,
+          resName: null,
+          resCode: null,
+          resLevel: null,
+          resIcon: null,
+          seq: null,
+          state: 1
+        },
+        addResFrom: {
+          resPid: 0,
+          resPname: '',
+          resType: 'menu',
+          resName: '',
+          resCode: '',
+          resLevel: 1,
+          resIcon: 'grid',
+          seq: 1,
+          state: 1
         },
         resValidate: {
           resPname: [
@@ -316,29 +324,44 @@
             {required: true, message: '类型不能为空', trigger: 'blur'}
           ]
         },
-        /*************资源END*************/
         /*************权限START*************/
-        permList: [],//表格数据
-        permPagePara: {//分页查询参数
-          total: 0,
-          page: 1,
-          pageSize: 10,
-          sidx: 'permId',
-          sort: 'asc',
-          queryCol: 'permName',
-          queryStr: ''
-        },
-        permOpsType: 'save',
+        permOpsType: 0,
         permVisible: false,
         permLoading: false,
-        permOpName: {show: '', save: '添加权限', update: '修改权限'},
-        permFrom: {
-          'permId': 0,
-          'resCode': '',
-          'permCode': '',
-          'permName': '',
-          'permUrl': '#',
-          'state': 1
+        //权限表格数据
+        permList: [],
+        //资源当前选择行
+        permCurrCol: null,
+        //权限分页查询参数
+        permPageParam: {
+          total: 0,
+          pageNum: 1,
+          pageSize: 10,
+          sidx: null,
+          sort: null
+        },
+        //权限查询参数
+        permPageQuery: {
+          queryKey: 'permName',
+          queryValue: null
+        },
+        sysPermission: {
+          permId: null,
+          resId: null,
+          resCode: null,
+          permCode: null,
+          permName: null,
+          permUrl: null,
+          state: 1
+        },
+        addPermFrom: {
+          permId: 0,
+          resId: '',
+          resCode: '',
+          permCode: '',
+          permName: '',
+          permUrl: 'grid',
+          state: 1
         },
         permValidate: {
           permName: [
@@ -352,34 +375,6 @@
           ]
         },
         /*************权限END*************/
-        /*************资源树START*************/
-        //资源树源数据
-        resTreeData: [],
-        //资源树
-        treeData: [
-          {
-            resName: '系统资源',
-            resId: 0,
-            resLevel: 0,
-            children: []
-          }
-        ],
-        //下拉树
-        dropTree: [{
-          resName: '系统资源',
-          resId: 0,
-          resLevel: 0,
-          children: []
-        }],
-        dropTreeProps: {
-          children: 'children',
-          label: 'resName'
-        },
-        buttonProps: {
-          type: 'ghost',
-          size: 'small',
-        },
-        /*************资源树END*************/
         //权限下拉菜单
         permission: [
           {
@@ -399,8 +394,6 @@
             text: '删除',
           },
         ],
-        //当前table页
-        currTabs: 'resource'
       }
     },
     mounted: function () {
@@ -410,90 +403,43 @@
       })
     },
     methods: {
-      renderContent (h, {root, node, data}) {
-        return h('span', {
-          style: {
-            display: 'inline-block',
-            width: '100%'
-          }
-        }, [
-          h('span', [
-            h('Icon', {
-              props: {
-                type: data.resId !== 0 ? data.resIcon : 'home'
-              },
-              style: {
-                marginLeft: '8px',
-              }
-            }),
-            h('Button', {
-              props: Object.assign({}, this.buttonProps, {
-                type: 'text'
-              }),
-              on: {
-                click: () => {
-                  this.treeDataChange(data, node)
-                }
-              }
-            }, data.resName)
-          ]),
-
-          h('span', {
-            style: {
-              display: 'inline-block',
-              float: 'right',
-              marginRight: '32px'
-            }
-          }, [
-            h('Button', {
-              props: Object.assign({}, this.buttonProps, {
-                icon: 'ios-plus-empty',
-                type: 'primary'
-              }),
-              style: data.resId !== 0 ? {marginRight: '8px'} : {width: '52px'},
-              on: {
-                click: () => {
-                  data.resId !== 0 ? this.addData(data, node) : this.addRes(data, node)
-                }
-              }
-            }),
-            data.resId !== 0 ? h('Button', {
-              props: Object.assign({}, this.buttonProps, {
-                icon: 'ios-minus-empty'
-              }),
-              on: {
-                click: () => { this.doDelRes(data, node) }
-              }
-            }) : null
-
-          ])
-        ])
+      //树添加按钮事件
+      resTreeAdd (data, node) {
+        data.resId !== 0 ? this.openSave(data, node) : this.resOpenSave(data, node)
       },
       //加载资源树
       getResTree () {
         this.$http.get('/api/resource/tree')
           .then(response => {
-            let {code, message, result} = response.data
-            if (code === 1) {
-              this.treeData[0].children = JSON.parse(JSON.stringify(result))
-              this.dropTree[0].children = JSON.parse(JSON.stringify(result))
-              this.resTreeData = response.data.result
+            let {code, msg, result} = response.data
+            if (code === 0) {
+              this.$store.commit('setResData', result)
+              this.resTreeData = JSON.parse(JSON.stringify(result.tree))
+            } else {
+              this.$Message.warning(msg)
             }
           })
       },
       //加载资源列表
       getResList () {
         this.resLoading = true
-        this.$http.get('/api/resource/listPage' +
-          '?pageNum=' + this.resPagePara.page +
-          '&pageSize=' + this.resPagePara.pageSize +
-          '&sidx=' + this.resPagePara.sidx +
-          '&sort=' + this.resPagePara.sort +
-          '&' + this.resPagePara.queryCol + '=' + this.resPagePara.queryStr
-        ).then(response => {
-          if (response.data.code === 1) {
-            this.resList = response.data.result.list
-            this.resPagePara.total = response.data.result.total
+        //默认排序
+        if (this.resPageParam.sidx === null) {
+          this.resPageParam.sidx = 'resPid,seq'
+        }
+        this.$http({
+          url: '/api/resource/listPage',
+          method: 'get',
+          params: {...this.resPageParam, ...this.resPageQuery.queryValue ? this.resPageQuery : this.queryParam}
+        }).then(response => {
+          let {code, msg, result} = response.data
+          if (code === 0) {
+            this.resCurrCol = null
+            this.resList = result.list
+            this.resPageParam.total = result.total
+            this.resPageParam.pageNum = result.pageNum
+          } else {
+            this.$Message.warning(msg)
           }
           setTimeout(() => {
             this.resLoading = false
@@ -503,16 +449,23 @@
       //加载权限列表
       getPermList () {
         this.permLoading = true
-        this.$http.get('/api/permission/listPage' +
-          '?pageNum=' + this.permPagePara.page +
-          '&pageSize=' + this.permPagePara.pageSize +
-          '&sidx=' + this.permPagePara.sidx +
-          '&sort=' + this.permPagePara.sort +
-          '&' + this.permPagePara.queryCol + '=' + this.permPagePara.queryStr
-        ).then(response => {
-          if (response.data.code === 1) {
-            this.permList = response.data.result.list
-            this.permPagePara.total = response.data.result.total
+        //默认排序
+        if (this.permPageParam.sidx === null) {
+          this.permPageParam.sidx = 'resId'
+        }
+        this.$http({
+          url: '/api/permission/listPage',
+          method: 'get',
+          params: {...this.permPageParam, ...this.permPageQuery.queryValue ? this.permPageQuery : this.queryParam}
+        }).then(response => {
+          let {code, msg, result} = response.data
+          if (code === 0) {
+            this.permCurrCol = null
+            this.permList = result.list
+            this.permPageParam.total = result.total
+            this.permPageParam.pageNum = result.pageNum
+          } else {
+            this.$Message.warning(msg)
           }
           setTimeout(() => {
             this.permLoading = false
@@ -530,148 +483,105 @@
       //资源树点击事件
       treeDataChange (data, node) {
         this.currNode = node
-        if (data.resLevel === 0) {
-          this.resPagePara.queryCol = ''
-          this.resPagePara.queryStr = ''
-          this.resPagePara.page = 1
-          this.permPagePara.queryCol = ''
-          this.permPagePara.queryStr = ''
-          this.permPagePara.page = 1
-        } else {
-          this.resPagePara.queryCol = 'resId'
-          this.resPagePara.queryStr = data.resId
-          this.permPagePara.queryCol = 'resCode'
-          this.permPagePara.queryStr = data.resCode
-        }
+        this.resPageQuery.queryValue = null
+        this.queryParam.resId = null
+        this.queryParam.resCode = null
         if (this.currTabs === 'resource') {
+          this.queryParam.resId = data.resLevel === 0 ? null : data.resId
           this.getResList()
         } else {
+          this.queryParam.resCode = data.resLevel === 0 ? null : data.resCode
           this.getPermList()
-        }
-      },
-      //添加资源下拉树点击事件
-      resTreeChange (data, node) {
-        this.currNode = node
-        if (data.resLevel > 2) {
-          this.$Message.info('最高只支持3级')
-          return false
-        }
-        this.resFrom.resPname = data.resName
-        this.resFrom.resLevel = data.resLevel + 1
-        this.resFrom.resPid = data.resId
-        let childrenRes = data.children
-        if (childrenRes.length > 0) {
-          this.resFrom.seq = childrenRes[childrenRes.length - 1].seq * 1 + 1
-        } else {
-          this.resFrom.seq = 1
-        }
-      },
-      //添加权限下拉树点击事件
-      permTreeChange (data, node) {
-        this.currNode = node
-        if (data.resLevel > 0) {
-          this.permFrom.resCode = data.resCode
-          this.permFrom.permName = data.resName
         }
       },
       //权限下拉菜单点击事件
       permCodeSelect (value) {
-        let permName = this.permFrom.permName
+        let permName = this.sysPermission.permName
         if (permName.indexOf('-') > 0) {
           permName = permName.substring(0, permName.indexOf('-'))
         }
         this.permission.forEach(data => {
           if (data.value === value) {
-            this.permFrom.permName = permName + '-' + data.text
+            this.sysPermission.permName = permName + '-' + data.text
           }
         })
       },
       // 资源翻页操作
       resPageChange (val) {
-        this.resPagePara.page = val
+        this.resPageParam.pageNum = val
         this.getResList()
       },
       //资源改变分页数量
       resSizeChange (val) {
-        this.resPagePara.pageSize = val
+        this.resPageParam.pageSize = val
         this.getResList()
       },
       //资源排序
       resSortChange (val) {
-        this.resPagePara.sidx = val.prop
-        this.resPagePara.sort = val.order
+        this.resPageParam.sidx = val.prop
+        this.resPageParam.sort = val.order
         this.getResList()
       },
+      //资源表格点击行事件
+      resClickRow (val) {
+        this.resCurrCol = val
+      },
       //添加资源
-      addRes (data, node) {
+      resOpenSave (data, node) {
         this.currNode = node
-        this.resOpName.show = this.resOpName.save
-        this.resetForm('resFrom')
+        this.resetForm('sysResource')
         if (data.resLevel > 2) {
           this.$Message.info('最高只支持3级')
           return false
         }
-        this.resFrom.resPname = data.resName
-        this.resFrom.resLevel = data.resLevel + 1
-        this.resFrom.resPid = data.resId
+        this.sysResource.resLevel = data.resLevel + 1
+        this.sysResource.resPid = data.resId
         let childrenRes = data.children
         if (childrenRes.length > 0) {
-          this.resFrom.seq = childrenRes[childrenRes.length - 1].seq * 1 + 1
+          this.sysResource.seq = childrenRes[childrenRes.length - 1].seq * 1 + 1
         } else {
-          this.resFrom.seq = 1
+          this.sysResource.seq = 1
         }
+        this.sysResource.resType = 'menu'
         this.resVisible = true
-        this.dropTree[0].children = JSON.parse(JSON.stringify(this.resTreeData))
-        this.resOpsType = 'save'
+        this.resOpsType = 0
       },
       //修改资源
-      editRes (val) {
-        this.resOpName.show = this.resOpName.update
-        this.resetForm('resFrom')
-        this.resFrom = JSON.parse(JSON.stringify(val))
-        this.resVisible = true
-        this.resOpsType = 'update'
+      resOpenEdit (val) {
+        this.resOpsType = 1
+        if (this.resCurrCol !== null) {
+          this.$http.get('/api/resource/' + this.resCurrCol.resId)
+            .then(response => {
+              let {code, msg, result} = response.data
+              if (code === 0) {
+                this.sysResource = result
+                this.resVisible = true
+              } else {
+                this.$Message.warning(msg)
+              }
+            })
+        }
       },
       //资源请求处理
       resOperation () {
-        if (this.resOpsType === 'save') {
+        if (this.resOpsType === 0) {
           this.doSaveRes()
-        } else if (this.resOpsType === 'update') {
+        } else if (this.resOpsType === 1) {
           this.doUpdateRes()
         }
       },
-      //权限翻页操作
-      permPageChange (val) {
-        this.permPagePara.page = val
-        this.getPermList()
-      },
-      //权限改变分页数量
-      permSizeChange (val) {
-        this.permPagePara.pageSize = val
-        this.getPermList()
-      },
-      //权限排序
-      permSortChange (val) {
-        this.permPagePara.sidx = val.prop
-        this.permPagePara.sort = val.order
-        this.getPermList()
-      },
-      //重置表格
-      resetForm (formName) {
-        this.$refs[formName].resetFields()
-      },
       doSaveRes () {
-        this.$refs['resFrom'].validate((valid) => {
+        this.$refs['sysResource'].validate((valid) => {
           if (valid) {
-            this.$http.post('/api/resource/', this.resFrom)
+            this.$http.post('/api/resource/', this.sysResource)
               .then(response => {
-                if (response.data.code === 1) {
+                if (response.data.code === 0) {
                   this.$Message.success('添加成功！')
-                  //this.resetForm('resFrom')
+                  this.resetForm('sysResource')
                   this.resVisible = false
-                  this.echoTree('save')
+                  this.echoTree(0)
                 } else {
-                  this.$Message.warning(response.data.message)
+                  this.$Message.warning(response.data.msg)
                 }
               })
           }
@@ -679,18 +589,18 @@
       },
       //执行更新操作
       doUpdateRes () {
-        this.$refs['resFrom'].validate((valid) => {
+        this.$refs['sysResource'].validate((valid) => {
           if (valid) {
-            this.$http.put('/api/resource/' + this.resFrom.resId, this.resFrom)
+            this.$http.put('/api/resource/' + this.sysResource.resId, this.sysResource)
               .then(response => {
-                if (response.data.code === 1) {
+                if (response.data.code === 0) {
                   this.$Message.success('修改成功！')
-                  // this.resetForm('resFrom')
+                  this.resetForm('sysResource')
                   this.resVisible = false
                   this.getResTree()
                   this.getResList()
                 } else {
-                  this.$Message.warning(response.data.message)
+                  this.$Message.warning(response.data.msg)
                 }
               })
           }
@@ -700,63 +610,128 @@
       doDelRes (data, node) {
         this.$Modal.confirm({
           title: '提示',
-          content: '<p>此操作将删除资源  <span style="color: red;">' + data.resName + '</span> , 是否继续?</p>',
+          content: '<p>此操作将删除资源 ' + data.resName + ', 是否继续?</p>',
           onOk: () => {
             this.$http.delete('/api/resource/' + data.resId)
               .then(response => {
-                if (response.data.code === 1) {
+                if (response.data.code === 0) {
                   this.$Message.success('删除成功！')
                   this.currNode = node
                   this.echoTree('delete')
                 } else {
-                  this.$Message.warning(response.data.message)
+                  this.$Message.warning(response.data.msg)
                 }
               })
           }
         })
       },
-      //添加权限
-      addPerm (data, node) {
-        this.currNode = node
-        this.permOpName.show = this.permOpName.save
-        this.resetForm('permFrom')
-        this.permVisible = true
-        this.permOpsType = 'save'
-        if (data.resLevel > 0) {
-          this.permFrom.resCode = data.resCode
-          this.permFrom.permName = data.resName
+      selectIcon (icon) {
+        this.sysResource.resIcon = icon
+      },
+      //查询
+      search () {
+        if (this.currTabs === 'resource') {
+          if (this.resPageQuery.queryValue) {
+            this.getResList()
+          }
+        } else {
+          if (this.permPageQuery.queryValue) {
+            this.getPermList()
+          }
         }
-        this.dropTree[0].children = JSON.parse(JSON.stringify(this.resTreeData))
+      },
+      //查询重置
+      searchRset () {
+        this.queryParam.resId = null
+        this.queryParam.resCode = null
+        if (this.currTabs === 'resource') {
+          this.resPageQuery.queryValue = null
+          this.getResList()
+        } else {
+          this.permPageQuery.queryValue = null
+          this.getPermList()
+        }
+      },
+      //资源级联选择
+      resSelectChange (data) {
+        this.sysResource.resPid = data.resId
+      },
+      //权限级联选择
+      permSelectChange (data) {
+        this.sysPermission.resId = data.resId
+      },
+      /*8888888888888888888888888888888888888888888888888888888888888888888888888888888888*/
+      //权限表格点击行事件
+      permClickRow (val) {
+        this.permCurrCol = val
+      },
+      //权限翻页操作
+      permPageChange (val) {
+        this.permPageParam.pageNum = val
+        this.getPermList()
+      },
+      //权限改变分页数量
+      permSizeChange (val) {
+        this.permPageParam.pageSize = val
+        this.getPermList()
+      },
+      //权限排序
+      permSortChange (val) {
+        this.permPageParam.sidx = val.prop
+        this.permPageParam.sort = val.order
+        this.getPermList()
+      },
+      //重置表格
+      resetForm (formName) {
+        this.$refs[formName].resetFields()
+      },
+      //添加权限
+      permOpenSave (data, node) {
+        this.currNode = node
+        this.permOpsType = 0
+        this.sysPermission = JSON.parse(JSON.stringify(this.addPermFrom))
+        this.sysPermission.resId = data.resId
+        this.sysPermission.permName = data.resName
+        this.permVisible = true
+        this.resetForm('sysPermission')
       },
       //修改权限
-      editPerm (data) {
-        this.permOpName.show = this.permOpName.update
-        this.resetForm('permFrom')
-        this.permFrom = JSON.parse(JSON.stringify(data))
-        this.permVisible = true
-        this.permOpsType = 'update'
+      permOpenEdit () {
+        this.permOpsType = 1
+        if (this.permCurrCol !== null) {
+          this.$http.get('/api/permission/' + this.permCurrCol.permId)
+            .then(response => {
+              let {code, msg, result} = response.data
+              if (code === 0) {
+                this.sysPermission = result
+                this.permVisible = true
+              } else {
+                this.$Message.warning(msg)
+              }
+            })
+        }
       },
       //权限请求处理
       permOperation () {
-        if (this.permOpsType === 'save') {
+        if (this.permOpsType === 0) {
           this.doSavePerm()
-        } else if (this.permOpsType === 'update') {
+        } else if (this.permOpsType === 1) {
           this.doUpdatePerm()
         }
       },
       //执行权限添加
       doSavePerm () {
-        this.$refs['permFrom'].validate((valid) => {
+        this.$refs['sysPermission'].validate((valid) => {
           if (valid) {
-            this.$http.post('/api/permission/', this.permFrom)
+            this.$http.post('/api/permission/', this.sysPermission)
               .then(response => {
-                if (response.data.code === 1) {
+                if (response.data.code === 0) {
                   this.$Message.success('添加成功！')
-                  this.resetForm('permFrom')
+                  this.resetForm('sysPermission')
                   this.permVisible = false
-                  this.echoTree('save')
+                  this.echoTree(0)
                 } else {
-                  this.$Message.warning(response.data.message)
+                  this.$Message.warning(response.data.msg)
                 }
               })
           }
@@ -764,46 +739,46 @@
       },
       //执行权限更新
       doUpdatePerm () {
-        this.$refs['permFrom'].validate((valid) => {
+        this.$refs['sysPermission'].validate((valid) => {
           if (valid) {
-            this.$http.put('/api/permission/' + this.permFrom.permId, this.permFrom)
+            this.$http.put('/api/permission/' + this.sysPermission.permId, this.sysPermission)
               .then(response => {
-                if (response.data.code === 1) {
+                if (response.data.code === 0) {
                   this.$Message.success('修改成功！')
-                  this.resetForm('permFrom')
+                  this.resetForm('sysPermission')
                   this.permVisible = false
                   this.getPermList()
                 } else {
-                  this.$Message.warning(response.data.message)
+                  this.$Message.warning(response.data.msg)
                 }
               })
           }
         })
       },
       //执行单个删除操作
-      doDelPerm (data) {
+      doDelPerm () {
         this.$Modal.confirm({
           title: '提示',
-          content: '<p>此操作将删除权限  <span style="color: red;">' + data.permName + '</span> , 是否继续?</p>',
+          content: '<p>此操作将删除权限  <span style="color: red;">' + this.permCurrCol.permName + '</span> , 是否继续?</p>',
           onOk: () => {
-            this.$http.delete('/api/permission/' + data.permId)
+            this.$http.delete('/api/permission/' + this.permCurrCol.permId)
               .then(response => {
-                if (response.data.code === 1) {
+                if (response.data.code === 0) {
                   this.$Message.success('删除成功！')
                   this.getPermList()
                 } else {
-                  this.$Message.warning(response.data.message)
+                  this.$Message.warning(response.data.msg)
                 }
               })
           }
         })
       },
       //树节点添加资源或权限
-      addData (data, node) {
+      openSave (data, node) {
         if (this.currTabs === 'resource') {
-          this.addRes(data, node)
+          this.resOpenSave(data, node)
         } else {
-          this.addPerm(data, node)
+          this.permOpenSave(data, node)
         }
       },
       //树节点回显
@@ -832,7 +807,8 @@
         if (!value) return true
         return data.resName.indexOf(value) !== -1
       }
-    },
+    }
+    ,
     watch: {
       filterText (val) {
         this.$refs.resTree.filter(val)

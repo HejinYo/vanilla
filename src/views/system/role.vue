@@ -1,43 +1,64 @@
 <template>
   <div class="ibox">
     <Row>
-      <i-Col :md="6">
+      <i-Col :md="24">
         <Card>
-          <div slot="title">
-            所有角色
-          </div>
+          <p slot="title">
+            <Icon type="ios-paw"></Icon>
+            角色管理
+          </p>
           <div slot="extra">
           </div>
-          <div>
-            <Button type="primary" @click="addRole">添加</Button>
-            <Button type="primary" @click="editRole">修改</Button>
-            <Button type="error" @click="doDeleteRole">删除</Button>
-            <!--     <Button type="info" @click="addRoleResource">授权</Button>-->
-          </div>
-          <br/>
-          <el-table :data="roleList" stripe highlight-current-row element-loading-text="拼命加载中"
-                    @current-change="roleCurrentRow" @sort-change="roleSortChange">
-            <el-table-column type="expand" label="展开">
-              <template slot-scope="props">
-                <Form :label-width="60">
-                  <FormItem label="角色编码">
-                    <span>{{ props.row.roleCode }}</span>
-                  </FormItem>
-                  <FormItem label="描述">
-                    <span>{{ props.row.roleDescription }}</span>
-                  </FormItem>
-                  <FormItem label="创建时间">
-                    <span>{{ props.row.createTime }}</span>
-                  </FormItem>
-                </Form>
-              </template>
+          <!--操作工具条-->
+          <Row>
+            <i-Col :xs="24" :sm="12" :md="14" :lg="16">
+              <Button type="primary" icon="android-add" @click="openSave">添加</Button>
+              <Button type="primary" icon="edit" :disabled="showEdit" @click="openEdit">修改</Button>
+              <Button type="error" icon="android-delete" :disabled="showDelete" @click="doDelete">删除</Button>
+            </i-Col>
 
-            </el-table-column>
+            <i-Col :xs="24" :sm="12" :md="10" :lg="8">
+              <i-Input v-model="pageQuery.queryValue" @on-enter="searchRole" placeholder="查询..." :maxlength="32" clearable>
+                <Select v-model="pageQuery.queryKey" @on-change="searchRole" slot="prepend" style="width: 80px">
+                  <Option value="roleName">角色名称</Option>
+                  <Option value="roleCode">角色编码</Option>
+                  <Option value="roleDescription">描述</Option>
+                </Select>
+                <Button type="primary" slot="append" @click="searchRole">
+                  <Icon type="ios-search-strong"></Icon>
+                </Button>
+                <Button type="error" slot="append" @click="searchRset">重置</Button>
+              </i-Input>
+            </i-Col>
+          </Row>
+          <br/>
+          <el-table :data="roleList" stripe border highlight-current-row element-loading-text="拼命加载中" v-loading="listLoading" size="mini"
+                    @row-click="clickRow" @selection-change="selectionRow" @row-dblclick="openEdit" @sort-change="sortChange">
+            <!--    <el-table-column type="expand" label="展开">
+                  <template slot-scope="props">
+                    <Form :label-width="60">
+                      <FormItem label="角色编码">
+                        <span>{{ props.row.roleCode }}</span>
+                      </FormItem>
+                      <FormItem label="描述">
+                        <span>{{ props.row.roleDescription }}</span>
+                      </FormItem>
+                      <FormItem label="创建时间">
+                        <span>{{ props.row.createTime }}</span>
+                      </FormItem>
+                    </Form>
+                  </template>
+
+                </el-table-column>-->
+            <el-table-column type="selection" align="center" width="55"></el-table-column>
+            <el-table-column prop="roleId" label="ID" sortable="custom" width="60"></el-table-column>
             <el-table-column label="角色名称" prop="roleName" align="center" show-overflow-tooltip min-width="90">
               <template slot-scope="scope">
                 {{scope.row.roleName}}({{scope.row.roleCode}})
               </template>
             </el-table-column>
+            <el-table-column prop="roleCode" label="角色编码" sortable="custom" align="center" width="180"></el-table-column>
+            <el-table-column prop="roleDescription" label="描述" sortable="custom" align="center" min-width="180"></el-table-column>
             <el-table-column prop="state" label="状态" sortable="custom" align="center" min-width="90">
               <template slot-scope="scope">
                 <Tag :color="scope.row.state == 1 ? 'green': 'red' ">
@@ -45,6 +66,7 @@
                 </Tag>
               </template>
             </el-table-column>
+            <el-table-column prop="createTime" label="创建日期" sortable="custom" align="center" width="180"></el-table-column>
             <el-table-column label="授权" align="center" width="70">
               <template slot-scope="scope">
                 <Button size="small" @click="addRoleResource(scope.row)">
@@ -55,81 +77,44 @@
           </el-table>
           <br/>
           <!--翻页工具条-->
-          <Page show-total size="small" placement="top" v-if="rolePagePara.total > 0"
-                :total="rolePagePara.total"
+          <Page show-elevator show-total show-sizer size="small" placement="top" v-if="pageParam.total > 0"
+                :total="pageParam.total" :current="pageParam.pageNum"
                 :page-size-opts="[10, 20, 50, 100]"
-                @on-change="rolePageChange"
-                @on-page-size-change="roleSizeChange">
-          </Page>
-        </Card>
-      </i-Col>
-
-      <i-Col :md="18">
-        <Card>
-          <div slot="title">
-            权限分配
-          </div>
-          <el-table :data="roleResourceList" stripe border highlight-current-row size="mini"
-                    @sort-change="roleResourceSortChange" @current-change="roleResourceCurrentRow">
-            <el-table-column prop="id" label="编号" align="center" sortable="custom" width="70"></el-table-column>
-            <el-table-column prop="roleCode" label="角色" align="center" width="120"></el-table-column>
-            <el-table-column prop="permName" label="资源权限" align="center" sortable="custom" width="300">
-              <template slot-scope="scope">
-                {{scope.row.resName}} ({{scope.row.permName}})
-              </template>
-            </el-table-column>
-            <!--<el-table-column prop="resName" label="资源名称" sortable="custom" width="150"></el-table-column>-->
-            <!--<el-table-column prop="resCode" label="资源编码" sortable="custom" width="150"></el-table-column>-->
-            <el-table-column prop="permCode" label="权限" align="center" sortable="custom" min-width="150">
-              <template slot-scope="scope">
-                {{scope.row.resCode}}:{{scope.row.permCode}}
-              </template>
-            </el-table-column>
-            <!-- <el-table-column label="操作" align="center" width="70">
-               <template slot-scope="scope">
-                 &lt;!&ndash;<Button type="" size="small" @click="openColEdit(scope.row)"><i class="fa fa-edit"></i></Button>&ndash;&gt;
-                 &lt;!&ndash;<Button type="error" size="small" @click="doColDelete(scope.row)"><i class="fa fa-trash-o"></i></Button>&ndash;&gt;
-                 <Button type="error" size="small"><i class="fa fa-trash-o"></i></Button>
-               </template>
-             </el-table-column>-->
-          </el-table>
-          <br/>
-          <!--翻页工具条-->
-          <Page show-elevator show-total show-sizer size="small" placement="top" v-if="roleResourcePagePara.total > 1"
-                :total="roleResourcePagePara.total"
-                :page-size-opts="[10, 20, 50, 100]"
-                @on-change="roleResourcePageChange"
-                @on-page-size-change="roleResourceSizeChange">
+                @on-change="currentChange"
+                @on-page-size-change="sizeChange">
           </Page>
         </Card>
       </i-Col>
     </Row>
 
-    <Modal :transfer="false" :mask-closable="false" v-model="roleVisible" title="添加角色" class-name="vertical-center-modal">
-      <Form ref="roleFrom" :model="roleFrom" :rules="roleValidate" :label-width="80">
-        <FormItem label="角色名称" prop="roleName">
-          <Input v-model="roleFrom.roleName" placeholder="请输入"/>
-        </FormItem>
-        <FormItem label="角色编码" prop="roleCode">
-          <Input v-model="roleFrom.roleCode" placeholder="请输入"/>
-        </FormItem>
-        <FormItem label="描述" prop="roleDescription">
-          <Input v-model="roleFrom.roleDescription" placeholder="请输入"/>
-        </FormItem>
-        <FormItem label="状态" prop="state">
-          <i-switch v-model="roleFrom.state" size="large" :true-value="1" :false-value="0">
-            <span slot="open">启用</span>
-            <span slot="close">禁用</span>
-          </i-switch>
-        </FormItem>
-      </Form>
+    <Modal :mask-closable="false" v-model="addRoleVisible" :title="showOperation">
+      <transition name="fade">
+        <Form ref="sysRole" :model="sysRole" :rules="addRoleRules" :label-width="80" v-if="addRoleVisible">
+          <FormItem label="角色名称" prop="roleName">
+            <Input v-model="sysRole.roleName" placeholder="请输入"/>
+          </FormItem>
+          <FormItem label="角色编码" prop="roleCode">
+            <Input v-model="sysRole.roleCode" placeholder="请输入"/>
+          </FormItem>
+          <FormItem label="描述" prop="roleDescription">
+            <Input v-model="sysRole.roleDescription" placeholder="请输入"/>
+          </FormItem>
+          <FormItem label="状态" prop="state">
+            <i-switch v-model="sysRole.state" size="large" :true-value="1" :false-value="0">
+              <span slot="open">启用</span>
+              <span slot="close">禁用</span>
+            </i-switch>
+          </FormItem>
+        </Form>
+      </transition>
       <div slot="footer">
-        <Button @click="roleVisible = false">取 消</Button>
-        <Button type="primary" @click="resOperation">确 定</Button>
+        <Button @click="operation(false)">取 消</Button>
+        <Button @click="resetForm('sysRole')">重 置</Button>
+        <Button type="primary" @click="operation(true)">确 定</Button>
       </div>
     </Modal>
 
-    <Modal :transfer="false" :mask-closable="false" v-model="roleResourceVisible" title="权限分配" class-name="vertical-center-modal">
+    <Modal :mask-closable="false" v-model="permissionVisible" title="权限分配">
       <Card :padding="10">
         <div slot="title">
           系统权限
@@ -142,9 +127,8 @@
                  :default-checked-keys="rolePermisson" ref="tree"
                  node-key="resCode" highlight-current :expand-on-click-node="true" accordion></el-tree>
       </Card>
-
       <div slot="footer">
-        <Button @click="roleResourceVisible = false">取 消</Button>
+        <Button @click="permissionVisible = false">取 消</Button>
         <Button @click="authorization" type="primary">确 定</Button>
       </div>
     </Modal>
@@ -158,28 +142,45 @@
     name: 'role',
     data () {
       return {
-        resourceTreeData: [],
-        rolePermisson: [],
+        listLoading: false,
+        //表格数据
         roleList: [],
-        roleSecol: null,//当前选择行
-        rolePagePara: {//分页查询参数
+        //当前选择行
+        currCol: null,
+        //列表选中行
+        currList: [],
+        //分页查询参数
+        pageParam: {
           total: 0,
-          page: 1,
+          pageNum: 1,
           pageSize: 10,
-          sidx: 'roleId',
-          sort: 'asc',
-          queryCol: '',
-          queryStr: ''
+          sidx: null,
+          sort: null
         },
-        resOpsType: 'save',
-        roleVisible: false,
-        roleFrom: {
-          'roleName': '',
-          'roleCode': '',
-          'roleDescription': '',
-          'state': 1
+        //查询参数
+        pageQuery: {
+          queryKey: 'roleName',
+          queryValue: null
         },
-        roleValidate: {
+        //高级查询
+        advancedSearch: false,
+        //高级查询参数
+        queryParam: {},
+        sysRole: {
+          roleName: null,
+          roleCode: null,
+          roleDescription: null,
+          state: 0
+        },
+        //新增界面是否显示
+        addRoleVisible: false,
+        addRoleForm: {
+          roleName: '',
+          roleCode: '',
+          roleDescription: '',
+          state: 1
+        },
+        addRoleRules: {
           roleName: [
             {required: true, message: '不能为空', trigger: 'blur'}
           ],
@@ -187,61 +188,69 @@
             {required: true, message: '不能为空', trigger: 'blur'}
           ]
         },
-        roleResourceList: [],
-        roleResourceSecol: null,//当前选择行
-        roleResourcePagePara: {//分页查询参数
-          total: 0,
-          page: 1,
-          pageSize: 10,
-          sidx: 'roleId,resId,permId',
-          sort: 'asc',
-          queryCol: '',
-          queryStr: ''
-        },
-        roleResourceOpsType: 'save',
-        roleResourceVisible: false,
-        roleResourceFrom: {
-          'resPid': 0,
-          'resPname': '',
-          'resType': 'menu',
-          'resName': '',
-          'resCode': '',
-          'resLevel': 1,
-          'resIcon': 'fa fa-folder',
-          'seq': 1,
-          'state': 1
-        },
-        roleResourceValidate: {
-          resPname: [
-            {required: true, message: '请选择上级资源', trigger: 'change'}
-          ],
-          resName: [
-            {required: true, message: '资源名称不能为空', trigger: 'blur'}
-          ],
-          resCode: [
-            {required: true, message: '资源编码不能为空', trigger: 'blur'}
-          ],
-          resType: [
-            {required: true, message: '类型不能为空', trigger: 'blur'}
-          ]
-        },
+        //显示授权
+        permissionVisible: false,
+        //资源树
+        resourceTreeData: [],
+        //角色权限
+        rolePermisson: [],
         treeProps: {
-          children: 'childrenRes',
+          children: 'children',
           label: 'resName'
-        }
+        },
+        operationType: 0
+      }
+    },
+    computed: {
+      showDelete () {
+        return this.currList.length === 0
+      },
+      showEdit () {
+        return this.currCol === null
+      },
+      showOperation () {
+        return this.operationType === 0 ? '添加角色' : '编辑角色'
       }
     },
     mounted: function () {
       this.$nextTick(function () {
         this.getRoleList()
-        this.getRoleResourceList()
       })
     },
     methods: {
+      //加载角色列表
+      getRoleList () {
+        this.listLoading = true
+        //默认排序
+        if (this.pageParam.sidx === null) {
+          this.pageParam.sidx = 'roleId'
+        }
+        this.$http({
+          url: '/api/role/listPage',
+          method: this.advancedSearch ? 'post' : 'get',
+          data: this.queryParam,
+          params: this.advancedSearch ? this.pageParam : {...this.pageParam, ...this.pageQuery}
+        }).then(response => {
+          let {code, msg, result} = response.data
+          if (code === 0) {
+            this.currCol = null
+            this.roleList = result.list
+            this.pageParam.total = result.total
+            this.pageParam.pageNum = result.pageNum
+          } else {
+            this.$Message.warning(msg)
+          }
+          setTimeout(() => {
+            this.listLoading = false
+          }, 100)
+        })
+
+      },
+      //获取角色拥有权限
       getRolePermission (roleId) {
         this.$http.get('/api/permission/granted/' + roleId)
           .then(response => {
-            if (response.data.code === 1) {
+            if (response.data.code === 0) {
               this.rolePermisson = response.data.result
               this.getPermissionTree()
             }
@@ -249,199 +258,168 @@
       },
       //加载权限树
       getPermissionTree () {
-        this.$http.get('/api/permission/tree')
+        this.$http.get('/api/permission/authTree')
           .then(response => {
-            if (response.data.code === 1) {
-              this.resourceTreeData = response.data.result.childrenRes
+            if (response.data.code === 0) {
+              this.resourceTreeData = response.data.result
             }
           })
       },
-      //加载角色列表
-      getRoleList () {
-        this.$http.get('/api/role/listPage' +
-          '?pageNum=' + this.rolePagePara.page +
-          '&pageSize=' + this.rolePagePara.pageSize +
-          '&sidx=' + this.rolePagePara.sidx +
-          '&sort=' + this.rolePagePara.sort +
-          '&' + this.rolePagePara.queryCol + '=' + this.rolePagePara.queryStr
-        ).then(response => {
-          if (response.data.code === 1) {
-            this.roleList = response.data.result.list
-            this.rolePagePara.total = response.data.result.total
-          }
-        })
-      },
-      //加载角色权限列表
-      getRoleResourceList () {
-        this.$http.get('/api/role/roleResourceListPage' +
-          '?pageNum=' + this.roleResourcePagePara.page +
-          '&pageSize=' + this.roleResourcePagePara.pageSize +
-          '&sidx=' + this.roleResourcePagePara.sidx +
-          '&sort=' + this.roleResourcePagePara.sort +
-          '&' + this.roleResourcePagePara.queryCol + '=' + this.roleResourcePagePara.queryStr
-        ).then(response => {
-          if (response.data.code === 1) {
-            this.roleResourceList = response.data.result.list
-            this.roleResourcePagePara.total = response.data.result.total
-          }
-        })
-      },
       //点击页码事件，翻页操作
-      rolePageChange (val) {
-        this.rolePagePara.page = val
+      currentChange (val) {
+        this.pageParam.pageNum = val
         this.getRoleList()
       },
+      //多选事件
+      selectionRow (val) {
+        this.currList = val
+      },
       //改变分页数量
-      roleSizeChange (val) {
-        this.rolePagePara.pageSize = val
+      sizeChange (val) {
+        this.pageParam.pageSize = val
         this.getRoleList()
       },
       //排序
-      roleSortChange (val) {
-        this.rolePagePara.sidx = val.prop
-        this.rolePagePara.sort = val.order
+      sortChange (val) {
+        this.pageParam.sidx = val.prop
+        this.pageParam.sort = val.order
         this.getRoleList()
       },
       //点击表格行事件
-      roleCurrentRow (val) {
-        this.roleSecol = val
-        if (null !== val) {
-          this.roleResourcePagePara.queryCol = 'roleCode'
-          this.roleResourcePagePara.queryStr = val.roleCode
+      clickRow (val) {
+        this.currCol = val
+      },
+      //操作
+      operation (flag) {
+        if (flag) {
+          if (this.operationType === 0) {
+            this.doSave()
+          } else if (this.operationType === 1) {
+            this.doUpdate()
+          }
         } else {
-          this.roleResourcePagePara.queryCol = ''
+          //取消操作
+          if (this.operationType === 0) {
+            this.resetForm('sysRole')
+          }
+          this.addRoleVisible = false
         }
-        this.getRoleResourceList()
-      },
-      //点击页码事件，翻页操作
-      roleResourcePageChange (val) {
-        this.roleResourcePagePara.page = val
-        this.getRoleResourceList()
-      },
-      //改变分页数量
-      roleResourceSizeChange (val) {
-        this.roleResourcePagePara.pageSize = val
-        this.getRoleResourceList()
-      },
-      //排序
-      roleResourceSortChange (val) {
-        this.roleResourcePagePara.sidx = val.prop
-        this.roleResourcePagePara.sort = val.order
-        this.getRoleResourceList()
-      },
-      //点击表格行事件
-      roleResourceCurrentRow (val) {
-        this.roleResourceSecol = val
       },
       //重置表格
       resetForm (formName) {
         this.$refs[formName].resetFields()
-      }
-      ,
-      addRole () {
-        this.resetForm('roleFrom')
-        this.roleVisible = true
-        this.resOpsType = 'save'
-      }
-      ,
-      editRole () {
-        if (null !== this.roleSecol) {
-          this.resetForm('roleFrom')
-          this.roleFrom = JSON.parse(JSON.stringify(this.roleSecol))
-          this.roleVisible = true
-          this.resOpsType = 'update'
-        }
-      }
-      ,
-      resOperation () {
-        if (this.resOpsType === 'save') {
-          this.doSaveRole()
-        } else if (this.resOpsType === 'update') {
-          this.doUpdateRole()
-        }
-      }
-      ,
-      doSaveRole () {
-        let _this = this
-        this.$refs['roleFrom'].validate((valid) => {
+      },
+      //显示新增界面
+      openSave: function () {
+        this.operationType = 0
+        this.sysRole = JSON.parse(JSON.stringify(this.addRoleForm))
+        this.addRoleVisible = true
+      },
+      //执行增加操作
+      doSave () {
+        this.$refs['sysRole'].validate((valid) => {
           if (valid) {
-            this.$http.post('/api/role/', this.roleFrom)
+            this.$http.post('/api/role/', this.sysRole)
               .then(response => {
-                if (response.data.code === 1) {
+                if (response.data.code === 0) {
                   this.$Message.success('添加成功！')
-                  this.resetForm('roleFrom')
-                  this.roleVisible = false
-                  _this.getRoleList()
+                  this.resetForm('sysRole')
+                  this.addRoleVisible = false
+                  this.getRoleList()
                 } else {
-                  this.$Message.warning(response.data.message)
+                  this.$Message.warning(response.data.msg)
                 }
               })
           }
         })
-      }
-      ,
+      },
+      openEdit (row) {
+        this.operationType = 1
+        if (this.currCol !== null) {
+          this.$http.get('/api/role/' + this.currCol.roleId)
+            .then(response => {
+              let {code, msg, result} = response.data
+              if (code === 0) {
+                this.sysRole = result
+                this.addRoleVisible = true
+              } else {
+                this.$Message.warning(msg)
+              }
+            })
+        }
+      },
       //执行更新操作
-      doUpdateRole () {
-        let _this = this
-        this.$refs['roleFrom'].validate((valid) => {
+      doUpdate () {
+        this.$refs['sysRole'].validate((valid) => {
           if (valid) {
-            this.$http.put('/api/role/' + this.roleFrom.roleId, this.roleFrom)
+            this.$http.put('/api/role/' + this.sysRole.roleId, this.sysRole)
               .then(response => {
-                if (response.data.code === 1) {
+                if (response.data.code === 0) {
                   this.$Message.success('修改成功！')
-                  this.resetForm('roleFrom')
-                  this.roleVisible = false
-                  _this.getRoleList()
+                  this.resetForm('sysRole')
+                  this.addRoleVisible = false
+                  this.getRoleList()
                 } else {
-                  this.$Message.warning(response.data.message)
+                  this.$Message.warning(response.data.msg)
                 }
               })
           }
         })
-      }
-      ,
-      //执行单个删除操作
-      doDeleteRole () {
-        let _this = this
-        if (null !== this.roleSecol) {
+      },
+      //执行 删除操作
+      doDelete () {
+        if (this.currList.length > 0) {
           this.$Modal.confirm({
             title: '提示',
-            content: '<p>此操作将删除角色 ' + this.roleSecol.roleName + ', 是否继续?</p>',
+            content: '<p>此操作将删除' + (this.currList.length > 1 ? '多个角色' : '角色 ' + this.currCol.roleName) + ', 是否继续?</p>',
             onOk: () => {
-              this.$http.delete('/api/role/' + this.roleSecol.roleId)
+              let roleIdList = []
+              this.currList.forEach(function (value, index, array) {
+                roleIdList.push(value.roleId)
+              })
+              this.$http.delete('/api/role/' + roleIdList)
                 .then(response => {
-                  if (response.data.code === 1) {
+                  if (response.data.code === 0) {
                     this.$Message.success('删除成功！')
-                    _this.getRoleList()
+                    this.getRoleList()
                   } else {
-                    this.$Message.warning(response.data.message)
+                    this.$Message.warning(response.data.msg)
                   }
                 })
             }
           })
         }
-      }
-      ,
+      },
       addRoleResource (val) {
         this.getRolePermission(val.roleId)
-        this.roleResourceVisible = true
+        this.permissionVisible = true
       },
       authorization () {
         let data = JSON.parse(JSON.stringify(this.$refs.tree.getCheckedNodes(true)))
-        this.$http.post('/api/role/authorization/' + this.roleSecol.roleId, data)
+        this.$http.post('/api/role/authorization/' + this.currCol.roleId, data)
           .then(response => {
-            if (response.data.code === 1) {
+            if (response.data.code === 0) {
               this.$Message.success('授权成功！')
-              this.roleResourceVisible = false
-              this.getRoleResourceList()
+              this.permissionVisible = false
             } else {
-              this.$Message.warning(response.data.message)
+              this.$Message.warning(response.data.msg)
             }
           })
       },
       resetChecked () {
         this.$refs.tree.setCheckedKeys([])
-      }
+      },
+      //查询
+      searchRole () {
+        if (this.pageQuery.queryValue) {
+          this.getRoleList()
+        }
+      },
+      //查询重置
+      searchRset () {
+        this.pageQuery.queryValue = null
+        this.getRoleList()
+      },
     }
   }
 </script>

@@ -33,7 +33,7 @@ axios.interceptors.response.use(function (response) {
     Notice.destroy('authc_error')
     Notice.info({
       title: '温馨提示',
-      desc: response.data.message,
+      desc: response.data.msg,
       duration: 0,
       name: 'authc_error'
     })
@@ -42,13 +42,13 @@ axios.interceptors.response.use(function (response) {
       query: {redirect: router.currentRoute.fullPath}
     })
     //返回reject阻拦本次请求，会报错，但是没办法
-    return Promise.reject(response.data.message)
+    return Promise.reject(response.data.msg)
   } else {
     return response
   }
 }, error => {
   if (error.response) {
-    let message = error.response.data.message
+    let message = error.response.data.msg
     switch (error.response.status) {
       case 401:
         Message.warning({

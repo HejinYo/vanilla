@@ -19,7 +19,7 @@ module.exports = {
         }
       },
       '/api': {
-        //target: 'http://47.94.208.248/',
+        //target: 'http://47.94.208.248:90/',
         target: 'http://127.0.0.1:80/',
         changeOrigin: true,
         pathRewrite: {
