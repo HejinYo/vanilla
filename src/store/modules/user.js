@@ -7,6 +7,7 @@ const user = {
     userAuth: [], //来自服务器的用户权限
     currAuth: [], //本地路由授权的全心爱你
     completeAuth: false, //是否完成路由授权
+    avatorImgPath: ''//用户头像地址
   },
   mutations: {
     //刷新页面重新获取用户信息
@@ -15,6 +16,8 @@ const user = {
         .then(response => {
           let {code, message, result} = response.data
           state.loginUser = result
+          state.avatorImgPath = result.avatar
+          console.log(result)
         })
     },
     //登录设置状态
@@ -59,6 +62,9 @@ const user = {
   getters: {
     loginUser: state => {
       return state.loginUser
+    },
+    userAvatar: state => {
+      return state.avatorImgPath + '?' + new Date()
     }
   }
 }

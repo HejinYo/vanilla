@@ -47,16 +47,9 @@
                       </Tag>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="resName" label="资源名称" sortable="custom" align="center" width="130"></el-table-column>
-                  <el-table-column prop="resCode" label="资源编码" sortable="custom" width="150"></el-table-column>
-                  <el-table-column prop="resPname" label="上级资源" sortable="custom" align="center" width="130"></el-table-column>
-                  <el-table-column prop="resLevel" label="级别" sortable="custom" align="center" width="90">
-                    <template slot-scope="scope">
-                      <Tag :color="scope.row.resLevel != 1 ? scope.row.resLevel == 2 ? 'yellow': scope.row.resLevel == 3 ? 'green': 'blue' : 'red' ">
-                        {{scope.row.resLevel}} 级
-                      </Tag>
-                    </template>
-                  </el-table-column>
+                  <el-table-column prop="resName" label="资源名称" sortable="custom" align="center" min-width="150"></el-table-column>
+                  <el-table-column prop="resCode" label="资源编码" sortable="custom" align="center" min-width="150"></el-table-column>
+                  <el-table-column prop="resPname" label="上级资源" sortable="custom" align="center" min-width="150"></el-table-column>
                   <el-table-column prop="resIcon" label="图标" show-overflow-tooltip align="center" width="70">
                     <template slot-scope="scope">
                       <Button type="text" size="small">
@@ -67,12 +60,12 @@
                   <el-table-column prop="seq" label="序号" align="center" width="70"></el-table-column>
                   <el-table-column prop="state" label="状态" align="center" width="90">
                     <template slot-scope="scope">
-                      <Tag :color="scope.row.state == 1 ? 'green': '' ">
-                        {{scope.row.state == 1 ? '正常' : '禁用'}}
+                      <Tag :color="scope.row.state == 0 ? 'green': 'red' ">
+                        {{scope.row.state == 0 ? '正常' : '禁用'}}
                       </Tag>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="createTime" label="创建日期" align="center" min-width="170"></el-table-column>
+                  <el-table-column prop="createTime" label="创建日期" align="center" width="180"></el-table-column>
                 </el-table>
                 <br/>
                 <!--翻页工具条-->
@@ -109,18 +102,18 @@
                 <el-table :data="permList" stripe border highlight-current-row v-loading="permLoading" size="mini" element-loading-text="拼命加载中"
                           @row-click="permClickRow" @row-dblclick="permOpenEdit" @sort-change="permSortChange">
                   <el-table-column prop="permId" label="编号" align="center" width="70"></el-table-column>
-                  <el-table-column prop="permName" label="权限名称" sortable="custom" align="center" width="150"></el-table-column>
-                  <el-table-column prop="resCode" label="资源编码" sortable="custom" align="center" width="150"></el-table-column>
-                  <el-table-column prop="permCode" label="权限编码" sortable="custom" align="center" width="150"></el-table-column>
-                  <el-table-column prop="permUrl" label="资源URL" sortable="custom" show-overflow-tooltip width="180"></el-table-column>
+                  <el-table-column prop="permName" label="权限名称" sortable="custom" align="center" min-width="150"></el-table-column>
+                  <el-table-column prop="resCode" label="资源编码" sortable="custom" align="center" min-width="150"></el-table-column>
+                  <el-table-column prop="permCode" label="权限编码" sortable="custom" align="center" min-width="150"></el-table-column>
+                  <el-table-column prop="permUrl" label="资源URL" sortable="custom" show-overflow-tooltip min-width="180"></el-table-column>
                   <el-table-column prop="state" label="状态" sortable="custom" align="center" width="90">
                     <template slot-scope="scope">
-                      <Tag :color="scope.row.state == 1 ? 'green': '' ">
-                        {{scope.row.state == 1 ? '正常' : '禁用'}}
+                      <Tag :color="scope.row.state == 0 ? 'green': 'red' ">
+                        {{scope.row.state == 0 ? '正常' : '禁用'}}
                       </Tag>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="createTime" label="创建日期" align="center" min-width="180"></el-table-column>
+                  <el-table-column prop="createTime" label="创建日期" align="center" width="180"></el-table-column>
                 </el-table>
                 <br/>
                 <!--翻页工具条-->
@@ -154,7 +147,7 @@
           <Input v-model="sysResource.resCode" placeholder="请输入"/>
         </FormItem>
         <FormItem label="资源图标：" prop="resIcon">
-          <i-Input v-model="sysResource.resIcon" placeholder="请输入">
+          <i-Input v-model="sysResource.resIcon" placeholder="请选择">
             <Poptip placement="right" slot="prepend">
               <Button type="ghost">
                 <Icon :type="sysResource.resIcon" :size="15"></Icon>
@@ -165,15 +158,11 @@
             </Poptip>
           </i-Input>
         </FormItem>
-        <FormItem label="资源级别" prop="resLevel">
-          <Rate disabled v-model="sysResource.resLevel" :count="3"></Rate>
-          {{addResFrom.resLevel}}级
-        </FormItem>
         <FormItem label="排序号" prop="seq">
           <InputNumber :max="100" :min="1" v-model="sysResource.seq"></InputNumber>
         </FormItem>
         <FormItem label="状态" prop="state">
-          <i-switch v-model="sysResource.state" size="large" :true-value="1" :false-value="0">
+          <i-switch v-model="sysResource.state" size="large" :true-value="0" :false-value="1">
             <span slot="open">启用</span>
             <span slot="close">禁用</span>
           </i-switch>
@@ -209,7 +198,7 @@
           <Input v-model="sysPermission.permUrl" placeholder="请输入"/>
         </FormItem>
         <FormItem label="状态" prop="state">
-          <i-switch v-model="sysPermission.state" size="large" :true-value="1" :false-value="0">
+          <i-switch v-model="sysPermission.state" size="large" :true-value="0" :false-value="1">
             <span slot="open">启用</span>
             <span slot="close">禁用</span>
           </i-switch>
@@ -262,8 +251,7 @@
         resTreeExpandedKeys: [0],
         //查询参数
         queryParam: {
-          resId: null,
-          resCode: null
+          resId: null
         },
         //当前table页
         currTabs: 'resource',
@@ -294,10 +282,9 @@
           resType: null,
           resName: null,
           resCode: null,
-          resLevel: null,
           resIcon: null,
           seq: null,
-          state: 1
+          state: 0
         },
         addResFrom: {
           resPid: 0,
@@ -305,10 +292,9 @@
           resType: 'menu',
           resName: '',
           resCode: '',
-          resLevel: 1,
           resIcon: 'grid',
           seq: 1,
-          state: 1
+          state: 0
         },
         resValidate: {
           resPname: [
@@ -352,7 +338,7 @@
           permCode: null,
           permName: null,
           permUrl: null,
-          state: 1
+          state: 0
         },
         addPermFrom: {
           permId: 0,
@@ -361,7 +347,7 @@
           permCode: '',
           permName: '',
           permUrl: 'grid',
-          state: 1
+          state: 0
         },
         permValidate: {
           permName: [
@@ -482,15 +468,13 @@
       },
       //资源树点击事件
       treeDataChange (data, node) {
+        console.log(node)
         this.currNode = node
         this.resPageQuery.queryValue = null
-        this.queryParam.resId = null
-        this.queryParam.resCode = null
+        this.queryParam.resId = node.level === 1 ? null : data.resId
         if (this.currTabs === 'resource') {
-          this.queryParam.resId = data.resLevel === 0 ? null : data.resId
           this.getResList()
         } else {
-          this.queryParam.resCode = data.resLevel === 0 ? null : data.resCode
           this.getPermList()
         }
       },
@@ -530,11 +514,10 @@
       resOpenSave (data, node) {
         this.currNode = node
         this.resetForm('sysResource')
-        if (data.resLevel > 2) {
+        if (node.level > 3) {
           this.$Message.info('最高只支持3级')
           return false
         }
-        this.sysResource.resLevel = data.resLevel + 1
         this.sysResource.resPid = data.resId
         let childrenRes = data.children
         if (childrenRes.length > 0) {
@@ -643,7 +626,6 @@
       //查询重置
       searchRset () {
         this.queryParam.resId = null
-        this.queryParam.resCode = null
         if (this.currTabs === 'resource') {
           this.resPageQuery.queryValue = null
           this.getResList()

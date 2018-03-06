@@ -12,26 +12,20 @@
         个人信息
       </p>
       <div>
-        <Form
-          ref="userForm"
-          :model="userForm"
-          :label-width="100"
-          label-position="right"
-          :rules="inforValidate"
-        >
+        <Form ref="currUser" :model="currUser" :label-width="100" label-position="right" :rules="inforValidate">
           <FormItem label="头像：">
             <a @click="initAvatar">
-              <Avatar :src="avatorPath" shape="square" size="large"></Avatar>
+              <Avatar :src="userAvatar" shape="square" size="large"></Avatar>
             </a>
           </FormItem>
-          <FormItem label="用户姓名：" prop="name">
+          <FormItem label="用户名：" prop="userName">
             <div style="display:inline-block;width:300px;">
-              <Input v-model="userForm.name"></Input>
+              <Input v-model="currUser.userName"></Input>
             </div>
           </FormItem>
-          <FormItem label="用户手机：" prop="cellphone">
+          <FormItem label="手机：" prop="phone">
             <div style="display:inline-block;width:204px;">
-              <Input v-model="userForm.cellphone" @on-keydown="hasChangePhone"></Input>
+              <Input v-model="currUser.phone" @on-keydown="hasChangePhone"></Input>
             </div>
             <div style="display:inline-block;position:relative;">
               <Button @click="getIdentifyCode" :disabled="canGetIdentifyCode">{{ gettingIdentifyCodeBtnContent }}</Button>
@@ -46,14 +40,19 @@
               </div>
             </div>
           </FormItem>
-          <FormItem label="公司：">
-            <span>{{ userForm.company }}</span>
+          <FormItem label="邮箱：" prop="email">
+            <div style="display:inline-block;width:300px;">
+              <Input v-model="currUser.email"></Input>
+            </div>
           </FormItem>
-          <FormItem label="部门：">
-            <span>{{ userForm.department }}</span>
-          </FormItem>
+          <!-- <FormItem label="公司：">
+             <span>{{ currUser.company }}</span>
+           </FormItem>
+           <FormItem label="部门：">
+             <span>{{ currUser.department }}</span>
+           </FormItem>-->
           <FormItem label="登录密码：">
-            <Button type="text" size="small" @click="showEditPassword">修改密码</Button>
+            <Button type="text" size="small" @click="editPasswordModal = true">修改密码</Button>
           </FormItem>
           <div>
             <Button type="text" style="width: 100px;" @click="cancelEditUserInfor">取消</Button>
@@ -76,11 +75,10 @@
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button type="text" @click="cancelEditPass">取消</Button>
+        <Button type="text" @click="editPasswordModal = false">取消</Button>
         <Button type="primary" :loading="savePassLoading" @click="saveEditPass">保存</Button>
       </div>
     </Modal>
-
 
     <Modal v-model="avatarModal" :mask-closable=false>
       <p slot="header">头像设置</p>
@@ -88,7 +86,7 @@
         <Row :gutter="10">
           <Col span="14" class="image-editor-con1">
           <div class="cropper">
-            <img id="avatarImg" alt="" :src="avatorPath">
+            <img id="avatarImg" alt="" :src="userAvatar">
           </div>
           </Col>
           <Col span="10" class="image-editor-con1">
@@ -132,18 +130,12 @@
 <script>
   import Cropper from 'cropperjs'
   import '../my-components/image-editor/cropper.min.css'
+  import { validatePhone } from '@/libs/validate'
+  import { mapGetters } from 'vuex'
 
   export default {
     name: 'ownspace_index',
     data () {
-      const validePhone = (rule, value, callback) => {
-        var re = /^1[0-9]{10}$/
-        if (!re.test(value)) {
-          callback(new Error('请输入正确格式的手机号'))
-        } else {
-          callback()
-        }
-      }
       const valideRePassword = (rule, value, callback) => {
         if (value !== this.editPasswordForm.newPass) {
           callback(new Error('两次输入密码不一致'))
@@ -152,13 +144,15 @@
         }
       }
       return {
-        userForm: {
-          name: '',
-          cellphone: '',
-          company: '',
-          department: ''
+        currUser: {
+          userName: null,
+          userPwd: null,
+          email: null,
+          phone: null,
+          roleId: null,
+          roleName: null,
+          state: 0
         },
-        uid: '', // 登录用户的userId
         securityCode: '', // 验证码
         phoneHasChanged: false, // 是否编辑了手机
         save_loading: false,
@@ -171,12 +165,16 @@
         canGetIdentifyCode: false, // 是否可点获取验证码
         checkIdentifyCodeLoading: false,
         inforValidate: {
-          name: [
+          userName: [
             {required: true, message: '请输入姓名', trigger: 'blur'}
           ],
-          cellphone: [
+          phone: [
             {required: true, message: '请输入手机号码'},
-            {validator: validePhone}
+            {validator: validatePhone}
+          ],
+          email: [
+            {required: true, message: '请输入邮箱', trigger: 'blur'},
+            {type: 'email', message: '邮箱格式不正确', trigger: 'blur'}
           ]
         },
         editPasswordForm: {
@@ -205,10 +203,35 @@
         avatarCropper: {},
       }
     },
+    mounted: function () {
+      this.$nextTick(function () {
+        this.getUserInfo()
+      })
+    },
+    computed: {
+      ...mapGetters([
+        'userAvatar'
+      ])
+    },
     methods: {
+      //获取用户信息
+      getUserInfo () {
+        this.$http.get('/api/user/info')
+          .then(response => {
+            let {code, msg, result} = response.data
+            if (code === 0) {
+              //重新获取用户信息
+              this.$store.commit('setLoginUser')
+              this.currUser = result
+            } else {
+              this.$Message.warning(msg)
+            }
+          })
+      },
+      //获取验证码
       getIdentifyCode () {
         this.hasGetIdentifyCode = true
-        this.$refs['userForm'].validate((valid) => {
+        this.$refs['currUser'].validate((valid) => {
           if (valid) {
             this.canGetIdentifyCode = true
             let timeLast = 60
@@ -227,9 +250,7 @@
           }
         })
       },
-      showEditPassword () {
-        this.editPasswordModal = true
-      },
+      //取消编辑用户信息
       cancelEditUserInfor () {
         this.$store.commit('removeTag', 'ownspace_index')
         localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList)
@@ -243,10 +264,11 @@
           name: lastPageName
         })
       },
+      //保存用户信息
       saveEdit () {
-        this.$refs['userForm'].validate((valid) => {
+        this.$refs['currUser'].validate((valid) => {
           if (valid) {
-            if (this.phoneHasChanged && this.userForm.cellphone !== this.initPhone) { // 手机号码修改过了而且修改之后的手机号和原来的不一样
+            if (this.phoneHasChanged && this.currUser.phone !== this.initPhone) { // 手机号码修改过了而且修改之后的手机号和原来的不一样
               if (this.hasGetIdentifyCode) { // 判断是否点了获取验证码
                 if (this.identifyCodeRight) { // 判断验证码是否正确
                   this.saveInfoAjax()
@@ -262,27 +284,27 @@
           }
         })
       },
-      cancelEditPass () {
-        this.editPasswordModal = false
-      },
+      //执行修改密码
       saveEditPass () {
         this.$refs['editPasswordForm'].validate((valid) => {
           if (valid) {
             this.savePassLoading = true
-            // you can write ajax request here
+            this.$http.put('/api/user/updatePassword', this.editPasswordForm)
+              .then(response => {
+                if (response.data.code === 0) {
+                  this.$Message.success('修改成功！')
+                  this.editPasswordModal = false
+                } else {
+                  this.$Message.warning(response.data.msg)
+                }
+                this.savePassLoading = false
+              })
           }
         })
       },
-      init () {
-        this.userForm.name = 'Lison'
-        this.userForm.cellphone = '17712345678'
-        this.initPhone = '17712345678'
-        this.userForm.company = 'TalkingData'
-        this.userForm.department = '可视化部门'
-      },
       cancelInputCodeBox () {
         this.inputCodeVisible = false
-        this.userForm.cellphone = this.initPhone
+        this.currUser.phone = this.initPhone
       },
       submitCode () {
         let vm = this
@@ -302,13 +324,25 @@
         this.hasGetIdentifyCode = false
         this.identifyCodeRight = false
       },
+      //保存用户信息
       saveInfoAjax () {
-        this.save_loading = true
-        setTimeout(() => {
-          this.$Message.success('保存成功')
-          this.save_loading = false
-        }, 1000)
+        this.$refs['currUser'].validate((valid) => {
+          if (valid) {
+            this.save_loading = true
+            this.$http.put('/api/user/updateUserInfo', this.currUser)
+              .then(response => {
+                if (response.data.code === 0) {
+                  this.$Message.success('修改成功！')
+                  this.getUserInfo()
+                } else {
+                  this.$Message.warning(response.data.msg)
+                }
+                this.save_loading = false
+              })
+          }
+        })
       },
+      //初始化图片剪切
       initAvatar () {
         this.avatarModal = !this.avatarModal
         let img1 = document.getElementById('avatarImg')
@@ -320,6 +354,7 @@
           zoomable: false,//是否允许缩放图片
         })
       },
+      //销毁图片剪切
       destroyAvatar () {
         this.avatarModal = !this.avatarModal
         setTimeout(() => {
@@ -335,6 +370,7 @@
         }
         reader.readAsDataURL(file)
       },
+      //保存头像
       handleCrop: function () {
         this.avatarCropper.getCroppedCanvas().toBlob(avatar => {
           // 创建form对象
@@ -347,20 +383,13 @@
               let {code, msg, result} = response.data
               if (code === 0) {
                 this.destroyAvatar()
+                this.getUserInfo()
                 this.$Message.info('头像设置成功')
               } else {
                 this.$Message.info(message)
               }
             })
         })
-      }
-    },
-    mounted () {
-      this.init()
-    },
-    computed: {
-      avatorPath () {
-        return localStorage.avatorImgPath
       }
     }
   }

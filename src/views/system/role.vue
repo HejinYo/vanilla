@@ -61,8 +61,8 @@
             <el-table-column prop="roleDescription" label="描述" sortable="custom" align="center" min-width="180"></el-table-column>
             <el-table-column prop="state" label="状态" sortable="custom" align="center" min-width="90">
               <template slot-scope="scope">
-                <Tag :color="scope.row.state == 1 ? 'green': 'red' ">
-                  {{scope.row.state == 1 ? '正常' : '禁用'}}
+                <Tag :color="scope.row.state == 0 ? 'green': 'red' ">
+                  {{scope.row.state == 0 ? '正常' : '禁用'}}
                 </Tag>
               </template>
             </el-table-column>
@@ -100,7 +100,7 @@
             <Input v-model="sysRole.roleDescription" placeholder="请输入"/>
           </FormItem>
           <FormItem label="状态" prop="state">
-            <i-switch v-model="sysRole.state" size="large" :true-value="1" :false-value="0">
+            <i-switch v-model="sysRole.state" size="large" :true-value="0" :false-value="1">
               <span slot="open">启用</span>
               <span slot="close">禁用</span>
             </i-switch>

@@ -40,12 +40,12 @@
             <el-table-column prop="email" label="邮箱" sortable="custom" align="center" min-width="180"></el-table-column>
             <el-table-column prop="roleName" label="角色" sortable="custom" align="center" min-width="100">
               <template slot-scope="scope">
-                <Tag :color="scope.row.roleId == 1 ? 'red': 'green' "> {{scope.row.roleName != null ? scope.row.roleName : '无'}} </Tag>
+                <Tag :color="scope.row.roleName != null ? 'green': 'red' "> {{scope.row.roleName != null ? scope.row.roleName : '无'}} </Tag>
               </template>
             </el-table-column>
             <el-table-column prop="state" label="状态" sortable="custom" align="center" width="90">
               <template slot-scope="scope">
-                <Tag :color="scope.row.state == 0 ? 'green': 'yellow' "> {{scope.row.state == 0 ? '正常' : '禁用'}} </Tag>
+                <Tag :color="scope.row.state == 0 ? 'green': 'red' "> {{scope.row.state == 0 ? '正常' : '禁用'}} </Tag>
               </template>
             </el-table-column>
             <el-table-column prop="loginIp" label="登录IP" sortable="custom" align="center" show-overflow-tooltip width="180"></el-table-column>
