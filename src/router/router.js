@@ -142,6 +142,16 @@ export const appRouter = [
         }
       },
       {
+        path: 'config',
+        name: 'config',
+        icon: 'aperture',
+        title: '参数配置',
+        meta: {requireAuth: true},
+        component: resolve => {
+          require(['@/views/system/config.vue'], resolve)
+        }
+      },
+      {
         path: 'access',
         name: 'access',
         icon: 'locked',
@@ -162,6 +172,25 @@ export const appRouter = [
         }
       }
 
+    ]
+  },
+  {
+    path: '/wechat',
+    icon: 'social-whatsapp',
+    title: '微信',
+    name: 'wechat',
+    meta: {requireAuth: true},
+    component: Main,
+    children: [
+      {
+        path: 'index',
+        name: 'joke',
+        title: '笑话',
+        meta: {requireAuth: true},
+        component: resolve => {
+          require(['@/views/wechat/joke.vue'], resolve)
+        }
+      }
     ]
   },
   {

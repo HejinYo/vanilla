@@ -6,6 +6,46 @@
           <Icon type="person-stalker"></Icon>
           用户管理
         </p>
+
+        <Row v-if="advancedSearch">
+          <!-- 高级查询 -->
+          <Card :dis-hover="true">
+            <Form ref="queryParam" :model="queryParam" :label-width="80" class="search">
+              <Row :gutter="8">
+                <i-Col :xs="24" :sm="8" :md="6" :lg="4">
+                  <FormItem label="用户名" prop="userName">
+                    <Input v-model="queryParam.userName" placeholder="用户名"></Input>
+                  </FormItem>
+                </i-Col>
+                <i-Col :xs="24" :sm="8" :md="6" :lg="4">
+                  <FormItem label="邮箱" prop="email">
+                    <Input v-model="queryParam.email" placeholder="邮箱"></Input>
+                  </FormItem>
+                </i-Col>
+                <i-Col :xs="24" :sm="8" :md="6" :lg="4">
+                  <FormItem label="手机" prop="phone">
+                    <Input v-model="queryParam.phone" placeholder="手机" :maxlength="11"></Input>
+                  </FormItem>
+                </i-Col>
+                <i-Col :xs="24" :sm="8" :md="6" :lg="4">
+                  <FormItem label="状态" prop="state">
+                    <Select v-model="queryParam.state" placeholder="状态">
+                      <Option value="0">启用</Option>
+                      <Option value="1">禁用</Option>
+                    </Select>
+                  </FormItem>
+                </i-Col>
+                <i-Col :xs="24" :sm="8" :md="6" :lg="4">
+                  <FormItem label="创建时间" prop="createTime">
+                    <Input v-model="queryParam.createTime" v-show="false"></Input>
+                    <DatePicker type="date" placeholder="创建时间" @on-change="dateHandleChange"></DatePicker>
+                  </FormItem>
+                </i-Col>
+              </Row>
+            </Form>
+          </Card>
+          <br/>
+        </Row>
         <!--操作工具条-->
         <Row>
           <i-Col :xs="24" :sm="12" :md="14" :lg="16">
@@ -15,8 +55,8 @@
           </i-Col>
 
           <i-Col :xs="24" :sm="12" :md="10" :lg="8">
-            <i-Input v-model="pageQuery.queryValue" @on-enter="searchUser" placeholder="查询..." :maxlength="32" clearable>
-              <Select v-model="pageQuery.queryKey" @on-change="searchUser" slot="prepend" style="width: 80px">
+            <i-Input v-model="pageQuery.queryValue" :disabled="advancedSearch" @on-enter="searchUser" placeholder="查询..." :maxlength="32" clearable>
+              <Select v-model="pageQuery.queryKey" :disabled="advancedSearch" @on-change="searchUser" slot="prepend" style="width: 80px">
                 <Option value="userName">用户名</Option>
                 <Option value="phone">电话</Option>
                 <Option value="email">邮箱</Option>
@@ -25,6 +65,11 @@
                 <Icon type="ios-search-strong"></Icon>
               </Button>
               <Button type="error" slot="append" @click="searchRset">重置</Button>
+              <Tooltip slot="append" trigger="hover" content="高级查询" placement="top" :disabled="advancedSearch">
+                <Button type="primary" @click="advancedSearch = !advancedSearch">
+                  <Icon :type=" advancedSearch ? 'chevron-up' : 'chevron-down' "></Icon>
+                </Button>
+              </Tooltip>
             </i-Input>
           </i-Col>
         </Row>
@@ -135,7 +180,13 @@
         //高级查询
         advancedSearch: false,
         //高级查询参数
-        queryParam: {},
+        queryParam: {
+          userName: null,
+          email: null,
+          phone: null,
+          state: null,
+          createTime: null
+        },
         //当前选择行
         currCol: null,
         //列表选中行
@@ -358,19 +409,27 @@
       },
       //查询
       searchUser () {
-        if (this.pageQuery.queryValue) {
+        if (this.advancedSearch || this.pageQuery.queryValue) {
           this.getUserList()
         }
       },
       //查询重置
       searchRset () {
-        this.pageQuery.queryValue = null
+        if (this.advancedSearch) {
+          this.resetForm('queryParam')
+        } else {
+          this.pageQuery.queryValue = null
+        }
         this.getUserList()
       },
       //重置表格
       resetForm (formName) {
         this.$refs[formName].resetFields()
       },
+      //iview大坑，时间选择器默认使用utc，不能使用v-model绑定
+      dateHandleChange (value) {
+        this.queryParam.createTime = value
+      }
     }
   }
 </script>
