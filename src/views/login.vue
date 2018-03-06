@@ -71,7 +71,7 @@
                     path: decodeURIComponent('/home')
                   })
                 } else {
-                  this.$Message.info(message)
+                  this.$Message.info(msg)
                 }
               })
           }
