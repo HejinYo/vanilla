@@ -386,7 +386,7 @@
                 this.getUserInfo()
                 this.$Message.info('头像设置成功')
               } else {
-                this.$Message.info(message)
+                this.$Message.info(msg)
               }
             })
         })
