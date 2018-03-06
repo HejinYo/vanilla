@@ -64,7 +64,6 @@
                 if (code === 0) {
                   this.$store.commit('login', result)
                   Cookies.set('user', this.account.username)
-                  Cookies.set('password', this.account.userpwd)
                   this.$store.commit('setAvator', 'http://ow1prafcd.bkt.clouddn.com/hejinyo.jpg')
                   this.$router.replace({
                     //path: decodeURIComponent(this.$route.query.redirect || '/home')
