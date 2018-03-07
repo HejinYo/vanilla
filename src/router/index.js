@@ -3,7 +3,7 @@ import iView from 'iview'
 import Util from '../libs/util'
 import VueRouter from 'vue-router'
 import Cookies from 'js-cookie'
-import { routers, otherRouter, appRouter } from './router'
+import {routers, otherRouter, appRouter} from './router'
 import store from '../store'
 import axios from '@/libs/axios'
 
@@ -100,10 +100,13 @@ const processMenu = (value) => {
       let auth = Util.getMenuAuth(value, item.name)
       if (auth) {
         currAuth.push(item.name)
+        item.icon = auth.micon ? auth.micon : item.icon
         if (item.children.length === 1) {
           let child = item.children[0]
+          let authItem = Util.getMenuAuth(auth.children, child.name)
+          item.children[0].icon = authItem.micon ? authItem.micon : item.children[0].icon
           if (child.meta.requireAuth) {
-            if (Util.getMenuAuth(auth.children, child.name)) {
+            if (authItem) {
               menuList.push(item)
               currAuth.push(child.name)
             }
@@ -115,8 +118,10 @@ const processMenu = (value) => {
           let childrenArr = []
           //检查子路由是否拥有权限
           childrenArr = item.children.filter(child => {
+            let authItem = Util.getMenuAuth(auth.children, child.name)
+            child.icon = authItem.micon ? authItem.micon : child.icon
             if (child.meta.requireAuth) {
-              if (Util.getMenuAuth(auth.children, child.name)) {
+              if (authItem) {
                 //子路由需要权限，并且用户拥有此权限
                 currAuth.push(child.name)
                 return child
