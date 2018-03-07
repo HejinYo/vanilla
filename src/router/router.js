@@ -176,7 +176,7 @@ export const appRouter = [
   },
   {
     path: '/wechat',
-    icon: 'social-whatsapp',
+    icon: 'chatbubbles',
     title: '微信',
     name: 'wechat',
     meta: {requireAuth: true},
@@ -184,6 +184,7 @@ export const appRouter = [
     children: [
       {
         path: 'index',
+        icon: 'social-whatsapp',
         name: 'joke',
         title: '笑话',
         meta: {requireAuth: true},
@@ -203,6 +204,7 @@ export const appRouter = [
     children: [
       {
         path: 'index',
+        icon: 'lock-combination',
         name: 'accesstest_index',
         title: '权限测试页',
         meta: {requireAuth: true},
@@ -222,6 +224,7 @@ export const appRouter = [
     children: [
       {
         path: 'index',
+        icon: 'earth',
         name: 'international_index',
         title: {i18n: 'international'},
         meta: {requireAuth: true},
@@ -460,6 +463,7 @@ export const appRouter = [
     children: [
       {
         path: 'index',
+        icon: 'android-sad',
         name: 'errorpage_index',
         title: '错误页面',
         meta: {requireAuth: true},
