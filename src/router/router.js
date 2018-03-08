@@ -64,7 +64,7 @@ export const otherRouter = {
   component: Main,
   children: [
     {
-      path: 'home', name: 'home_index', title: {i18n: 'home'}, meta: {requireAuth: false}, component: resolve => {
+      path: 'home', name: 'home_index', title: {i18n: 'home'}, meta: {requireAuth: true}, component: resolve => {
       require(['@/views/home/home.vue'], resolve)
     }
     },
