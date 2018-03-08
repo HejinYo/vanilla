@@ -67,7 +67,6 @@ export const otherRouter = {
       path: 'home', name: 'home_index', title: {i18n: 'home'}, meta: {requireAuth: true}, component: resolve => {
       require(['@/views/home/home.vue'], resolve)
     }
-
     },
     {
       path: 'ownspace', name: 'ownspace_index', title: '个人中心', meta: {requireAuth: true}, component: resolve => {
