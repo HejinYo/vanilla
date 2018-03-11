@@ -156,6 +156,7 @@
 
 <script>
   import { validatePhone } from '@/libs/validate'
+  import { userListPage, reqUserSave, reqUserInfo, reqUserUpdate, reqUserDelete } from '@/api/api'
   import { mapGetters, mapActions } from 'vuex'
 
   export default {
@@ -264,13 +265,8 @@
         if (this.pageParam.sidx === null) {
           this.pageParam.sidx = 'userId'
         }
-        this.$http({
-          url: '/api/user/listPage',
-          method: this.advancedSearch ? 'post' : 'get',
-          data: this.queryParam,
-          params: this.advancedSearch ? this.pageParam : {...this.pageParam, ...this.pageQuery}
-        }).then(response => {
-          let {code, msg, result} = response.data
+        userListPage(this.advancedSearch ? 'post' : 'get', this.queryParam, this.advancedSearch ? this.pageParam : {...this.pageParam, ...this.pageQuery}).then(data => {
+          let {code, msg, result} = data
           if (code === 0) {
             this.currCol = null
             this.userList = result.list
@@ -305,17 +301,17 @@
       doSave () {
         this.$refs['sysUser'].validate((valid) => {
           if (valid) {
-            this.$http.post('/api/user/', this.sysUser)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('添加成功！')
-                  this.resetForm('sysUser')
-                  this.addUserVisible = false
-                  this.getUserList()
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqUserSave(this.sysUser).then(data => {
+              let {code, msg, result} = data
+              if (code === 0) {
+                this.$Message.success('添加成功！')
+                this.resetForm('sysUser')
+                this.addUserVisible = false
+                this.getUserList()
+              } else {
+                this.$Message.warning(msg)
+              }
+            })
           }
         })
       },
@@ -323,33 +319,32 @@
       openEdit (row) {
         this.operationType = 1
         if (this.currCol !== null) {
-          this.$http.get('/api/user/' + this.currCol.userId)
-            .then(response => {
-              let {code, msg, result} = response.data
-              if (code === 0) {
-                this.sysUser = result
-                this.addUserVisible = true
-              } else {
-                this.$Message.warning(msg)
-              }
-            })
+          reqUserInfo(this.currCol.userId).then(data => {
+            let {code, msg, result} = data
+            if (code === 0) {
+              this.sysUser = result
+              this.addUserVisible = true
+            } else {
+              this.$Message.warning(msg)
+            }
+          })
         }
       },
       //执行更新操作
       doUpdate () {
         this.$refs['sysUser'].validate((valid) => {
           if (valid) {
-            this.$http.put('/api/user/' + this.sysUser.userId, this.sysUser)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('修改成功！')
-                  this.resetForm('sysUser')
-                  this.addUserVisible = false
-                  this.getUserList()
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqUserUpdate(this.sysUser.userId, this.sysUser).then(data => {
+              let {code, msg, result} = data
+              if (code === 0) {
+                this.$Message.success('修改成功！')
+                this.resetForm('sysUser')
+                this.addUserVisible = false
+                this.getUserList()
+              } else {
+                this.$Message.warning(msg)
+              }
+            })
           }
         })
       },
@@ -364,15 +359,15 @@
               this.currList.forEach(function (value, index, array) {
                 userIdList.push(value.userId)
               })
-              this.$http.delete('/api/user/' + userIdList)
-                .then(response => {
-                  if (response.data.code === 0) {
-                    this.$Message.success('删除成功！')
-                    this.getUserList()
-                  } else {
-                    this.$Message.warning(response.data.msg)
-                  }
-                })
+              reqUserDelete(userIdList).then(data => {
+                let {code, msg, result} = data
+                if (code === 0) {
+                  this.$Message.success('删除成功！')
+                  this.getUserList()
+                } else {
+                  this.$Message.warning(msg)
+                }
+              })
             }
           })
         }

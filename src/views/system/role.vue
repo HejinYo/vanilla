@@ -138,6 +138,8 @@
 
 </template>
 <script>
+  import { reqRoleListPage, reqRoleSave, reqRoleInfo, reqRoleUpdate, reqRoleDelete, reqRolePerm, reqPermissionTree, reqAuthorization } from '@/api/api'
+
   export default {
     name: 'role',
     data () {
@@ -225,13 +227,8 @@
         if (this.pageParam.sidx === null) {
           this.pageParam.sidx = 'roleId'
         }
-        this.$http({
-          url: '/api/role/listPage',
-          method: this.advancedSearch ? 'post' : 'get',
-          data: this.queryParam,
-          params: this.advancedSearch ? this.pageParam : {...this.pageParam, ...this.pageQuery}
-        }).then(response => {
-          let {code, msg, result} = response.data
+        reqRoleListPage(this.advancedSearch ? 'post' : 'get', this.queryParam, this.advancedSearch ? this.pageParam : {...this.pageParam, ...this.pageQuery}).then(data => {
+          let {code, msg, result} = data
           if (code === 0) {
             this.currCol = null
             this.roleList = result.list
@@ -247,23 +244,23 @@
 
       },
       //获取角色拥有权限
-      getRolePermission (roleId) {
-        this.$http.get('/api/permission/granted/' + roleId)
-          .then(response => {
-            if (response.data.code === 0) {
-              this.rolePermisson = response.data.result
-              this.getPermissionTree()
-            }
-          })
+      reqRolePermission (roleId) {
+        reqRolePerm(roleId).then(data => {
+          let {code, msg, result} = data
+          if (code === 0) {
+            this.rolePermisson = result
+            this.getPermissionTree()
+          }
+        })
       },
       //加载权限树
       getPermissionTree () {
-        this.$http.get('/api/permission/authTree')
-          .then(response => {
-            if (response.data.code === 0) {
-              this.resourceTreeData = response.data.result
-            }
-          })
+        reqPermissionTree().then(data => {
+          let {code, msg, result} = data
+          if (code === 0) {
+            this.resourceTreeData = result
+          }
+        })
       },
       //点击页码事件，翻页操作
       currentChange (val) {
@@ -319,50 +316,49 @@
       doSave () {
         this.$refs['sysRole'].validate((valid) => {
           if (valid) {
-            this.$http.post('/api/role/', this.sysRole)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('添加成功！')
-                  this.resetForm('sysRole')
-                  this.addRoleVisible = false
-                  this.getRoleList()
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqRoleSave(this.sysRole).then(data => {
+              let {code, msg, result} = data
+              if (code === 0) {
+                this.$Message.success('添加成功！')
+                this.resetForm('sysRole')
+                this.addRoleVisible = false
+                this.getRoleList()
+              } else {
+                this.$Message.warning(msg)
+              }
+            })
           }
         })
       },
       openEdit (row) {
         this.operationType = 1
         if (this.currCol !== null) {
-          this.$http.get('/api/role/' + this.currCol.roleId)
-            .then(response => {
-              let {code, msg, result} = response.data
-              if (code === 0) {
-                this.sysRole = result
-                this.addRoleVisible = true
-              } else {
-                this.$Message.warning(msg)
-              }
-            })
+          reqRoleInfo(this.currCol.roleId).then(data => {
+            let {code, msg, result} = data
+            if (code === 0) {
+              this.sysRole = result
+              this.addRoleVisible = true
+            } else {
+              this.$Message.warning(msg)
+            }
+          })
         }
       },
       //执行更新操作
       doUpdate () {
         this.$refs['sysRole'].validate((valid) => {
           if (valid) {
-            this.$http.put('/api/role/' + this.sysRole.roleId, this.sysRole)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('修改成功！')
-                  this.resetForm('sysRole')
-                  this.addRoleVisible = false
-                  this.getRoleList()
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqRoleUpdate(this.sysRole.roleId, this.sysRole).then(data => {
+              let {code, msg, result} = data
+              if (code === 0) {
+                this.$Message.success('修改成功！')
+                this.resetForm('sysRole')
+                this.addRoleVisible = false
+                this.getRoleList()
+              } else {
+                this.$Message.warning(msg)
+              }
+            })
           }
         })
       },
@@ -377,34 +373,34 @@
               this.currList.forEach(function (value, index, array) {
                 roleIdList.push(value.roleId)
               })
-              this.$http.delete('/api/role/' + roleIdList)
-                .then(response => {
-                  if (response.data.code === 0) {
-                    this.$Message.success('删除成功！')
-                    this.getRoleList()
-                  } else {
-                    this.$Message.warning(response.data.msg)
-                  }
-                })
+              reqRoleDelete(roleIdList).then(data => {
+                let {code, msg, result} = data
+                if (code === 0) {
+                  this.$Message.success('删除成功！')
+                  this.getRoleList()
+                } else {
+                  this.$Message.warning(msg)
+                }
+              })
             }
           })
         }
       },
       addRoleResource (val) {
-        this.getRolePermission(val.roleId)
+        this.reqRolePermission(val.roleId)
         this.permissionVisible = true
       },
       authorization () {
-        let data = JSON.parse(JSON.stringify(this.$refs.tree.getCheckedNodes(true)))
-        this.$http.post('/api/role/authorization/' + this.currCol.roleId, data)
-          .then(response => {
-            if (response.data.code === 0) {
-              this.$Message.success('授权成功！')
-              this.permissionVisible = false
-            } else {
-              this.$Message.warning(response.data.msg)
-            }
-          })
+        let checkData = JSON.parse(JSON.stringify(this.$refs.tree.getCheckedNodes(true)))
+        reqAuthorization(this.currCol.roleId, checkData).then(data => {
+          let {code, msg, result} = data
+          if (code === 0) {
+            this.$Message.success('授权成功！')
+            this.permissionVisible = false
+          } else {
+            this.$Message.warning(msg)
+          }
+        })
       },
       resetChecked () {
         this.$refs.tree.setCheckedKeys([])

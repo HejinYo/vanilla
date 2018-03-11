@@ -217,6 +217,10 @@
   import editTree from '@/components/editTree'
   import iconSelect from '@/components/iconSelect'
   import resSelect from '@/components/resSelect'
+  import {
+    reqResourceListPage, reqResourceTree, reqResourceSave, reqResourceInfo, reqResourceUpdate, reqResourceDelete,
+    reqPermissionListPage, reqPermissionSave, reqPermissionInfo, reqPermissionUpdate, reqPermissionDelete
+  } from '@/api/api'
 
   export default {
     name: 'resource',
@@ -395,16 +399,15 @@
       },
       //加载资源树
       getResTree () {
-        this.$http.get('/api/resource/tree')
-          .then(response => {
-            let {code, msg, result} = response.data
-            if (code === 0) {
-              this.$store.commit('setResData', result)
-              this.resTreeData = JSON.parse(JSON.stringify(result.tree))
-            } else {
-              this.$Message.warning(msg)
-            }
-          })
+        reqResourceTree().then(data => {
+          let {code, msg, result} = data
+          if (code === 0) {
+            this.$store.commit('setResData', result)
+            this.resTreeData = JSON.parse(JSON.stringify(result.tree))
+          } else {
+            this.$Message.warning(msg)
+          }
+        })
       },
       //加载资源列表
       getResList () {
@@ -413,12 +416,8 @@
         if (this.resPageParam.sidx === null) {
           this.resPageParam.sidx = 'resPid,seq'
         }
-        this.$http({
-          url: '/api/resource/listPage',
-          method: 'get',
-          params: {...this.resPageParam, ...this.resPageQuery.queryValue ? this.resPageQuery : this.queryParam}
-        }).then(response => {
-          let {code, msg, result} = response.data
+        reqResourceListPage({...this.resPageParam, ...this.resPageQuery.queryValue ? this.resPageQuery : this.queryParam}).then(data => {
+          let {code, msg, result} = data
           if (code === 0) {
             this.resCurrCol = null
             this.resList = result.list
@@ -439,12 +438,8 @@
         if (this.permPageParam.sidx === null) {
           this.permPageParam.sidx = 'resId'
         }
-        this.$http({
-          url: '/api/permission/listPage',
-          method: 'get',
-          params: {...this.permPageParam, ...this.permPageQuery.queryValue ? this.permPageQuery : this.queryParam}
-        }).then(response => {
-          let {code, msg, result} = response.data
+        reqPermissionListPage({...this.permPageParam, ...this.permPageQuery.queryValue ? this.permPageQuery : this.queryParam}).then(data => {
+          let {code, msg, result} = data
           if (code === 0) {
             this.permCurrCol = null
             this.permList = result.list
@@ -533,16 +528,15 @@
       resOpenEdit (val) {
         this.resOpsType = 1
         if (this.resCurrCol !== null) {
-          this.$http.get('/api/resource/' + this.resCurrCol.resId)
-            .then(response => {
-              let {code, msg, result} = response.data
-              if (code === 0) {
-                this.sysResource = result
-                this.resVisible = true
-              } else {
-                this.$Message.warning(msg)
-              }
-            })
+          reqResourceInfo(this.resCurrCol.resId).then(data => {
+            let {code, msg, result} = data
+            if (code === 0) {
+              this.sysResource = result
+              this.resVisible = true
+            } else {
+              this.$Message.warning(msg)
+            }
+          })
         }
       },
       //资源请求处理
@@ -556,17 +550,16 @@
       doSaveRes () {
         this.$refs['sysResource'].validate((valid) => {
           if (valid) {
-            this.$http.post('/api/resource/', this.sysResource)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('添加成功！')
-                  this.resetForm('sysResource')
-                  this.resVisible = false
-                  this.echoTree(0)
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqResourceSave(this.sysResource).then(data => {
+              if (data.code === 0) {
+                this.$Message.success('添加成功！')
+                this.resetForm('sysResource')
+                this.resVisible = false
+                this.echoTree(0)
+              } else {
+                this.$Message.warning(data.msg)
+              }
+            })
           }
         })
       },
@@ -574,18 +567,17 @@
       doUpdateRes () {
         this.$refs['sysResource'].validate((valid) => {
           if (valid) {
-            this.$http.put('/api/resource/' + this.sysResource.resId, this.sysResource)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('修改成功！')
-                  this.resetForm('sysResource')
-                  this.resVisible = false
-                  this.getResTree()
-                  this.getResList()
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqResourceUpdate(this.sysResource.resId, this.sysResource).then(data => {
+              if (data.code === 0) {
+                this.$Message.success('修改成功！')
+                this.resetForm('sysResource')
+                this.resVisible = false
+                this.getResTree()
+                this.getResList()
+              } else {
+                this.$Message.warning(data.msg)
+              }
+            })
           }
         })
       },
@@ -595,16 +587,15 @@
           title: '提示',
           content: '<p>此操作将删除资源 ' + data.resName + ', 是否继续?</p>',
           onOk: () => {
-            this.$http.delete('/api/resource/' + data.resId)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('删除成功！')
-                  this.currNode = node
-                  this.echoTree('delete')
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqResourceDelete(data.resId).then(data => {
+              if (data.code === 0) {
+                this.$Message.success('删除成功！')
+                this.currNode = node
+                this.echoTree('delete')
+              } else {
+                this.$Message.warning(data.msg)
+              }
+            })
           }
         })
       },
@@ -681,16 +672,15 @@
       permOpenEdit () {
         this.permOpsType = 1
         if (this.permCurrCol !== null) {
-          this.$http.get('/api/permission/' + this.permCurrCol.permId)
-            .then(response => {
-              let {code, msg, result} = response.data
-              if (code === 0) {
-                this.sysPermission = result
-                this.permVisible = true
-              } else {
-                this.$Message.warning(msg)
-              }
-            })
+          reqPermissionInfo(this.permCurrCol.permId).then(data => {
+            let {code, msg, result} = data
+            if (code === 0) {
+              this.sysPermission = result
+              this.permVisible = true
+            } else {
+              this.$Message.warning(msg)
+            }
+          })
         }
       },
       //权限请求处理
@@ -705,17 +695,16 @@
       doSavePerm () {
         this.$refs['sysPermission'].validate((valid) => {
           if (valid) {
-            this.$http.post('/api/permission/', this.sysPermission)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('添加成功！')
-                  this.resetForm('sysPermission')
-                  this.permVisible = false
-                  this.echoTree(0)
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqPermissionSave(this.sysPermission).then(data => {
+              if (data.code === 0) {
+                this.$Message.success('添加成功！')
+                this.resetForm('sysPermission')
+                this.permVisible = false
+                this.echoTree(0)
+              } else {
+                this.$Message.warning(data.msg)
+              }
+            })
           }
         })
       },
@@ -723,17 +712,16 @@
       doUpdatePerm () {
         this.$refs['sysPermission'].validate((valid) => {
           if (valid) {
-            this.$http.put('/api/permission/' + this.sysPermission.permId, this.sysPermission)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('修改成功！')
-                  this.resetForm('sysPermission')
-                  this.permVisible = false
-                  this.getPermList()
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqPermissionUpdate(this.sysPermission.permId, this.sysPermission).then(data => {
+              if (data.code === 0) {
+                this.$Message.success('修改成功！')
+                this.resetForm('sysPermission')
+                this.permVisible = false
+                this.getPermList()
+              } else {
+                this.$Message.warning(data.msg)
+              }
+            })
           }
         })
       },
@@ -743,15 +731,14 @@
           title: '提示',
           content: '<p>此操作将删除权限  <span style="color: red;">' + this.permCurrCol.permName + '</span> , 是否继续?</p>',
           onOk: () => {
-            this.$http.delete('/api/permission/' + this.permCurrCol.permId)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('删除成功！')
-                  this.getPermList()
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqPermissionDelete(this.permCurrCol.permId).then(data => {
+              if (data.code === 0) {
+                this.$Message.success('删除成功！')
+                this.getPermList()
+              } else {
+                this.$Message.warning(data.msg)
+              }
+            })
           }
         })
       },

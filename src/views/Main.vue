@@ -74,6 +74,7 @@
   import messageTip from './main-components/message-tip.vue'
   import themeSwitch from './main-components/theme-switch/theme-switch.vue'
   import util from '@/libs/util.js'
+  import { requestLogOut } from '@/api/api'
   import { mapGetters } from 'vuex'
 
   export default {
@@ -143,7 +144,7 @@
           })
         } else if (name === 'loginout') {
           // 退出登录
-          this.$http.get('/api/logout').then(response => {
+          requestLogOut().then(response => {
             this.$store.commit('logout', this)
           })
           // 清除所有数据

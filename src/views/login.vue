@@ -35,6 +35,7 @@
 
 <script>
   import Cookies from 'js-cookie'
+  import { requestLogin } from '@/api/api'
 
   export default {
     data () {
@@ -58,21 +59,20 @@
         this.$refs.loginForm.validate((valid) => {
           if (valid) {
             this.$Notice.destroy()
-            this.$http.post('/api/login', this.account)
-              .then(response => {
-                let {code, msg, result} = response.data
-                if (code === 0) {
-                  this.$store.commit('login', result)
-                  Cookies.set('user', this.account.username)
-                  this.$store.commit('setAvator', 'http://ow1prafcd.bkt.clouddn.com/hejinyo.jpg')
-                  this.$router.replace({
-                    //path: decodeURIComponent(this.$route.query.redirect || '/home')
-                    path: decodeURIComponent('/home')
-                  })
-                } else {
-                  this.$Message.info(msg)
-                }
-              })
+            requestLogin(this.account).then(data => {
+              let {code, msg, result} = data
+              if (code === 0) {
+                this.$store.commit('login', result)
+                Cookies.set('user', this.account.username)
+                this.$store.commit('setAvator', 'http://ow1prafcd.bkt.clouddn.com/hejinyo.jpg')
+                this.$router.replace({
+                  //path: decodeURIComponent(this.$route.query.redirect || '/home')
+                  path: decodeURIComponent('/home')
+                })
+              } else {
+                this.$Message.info(msg)
+              }
+            })
           }
         })
       }
