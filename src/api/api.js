@@ -106,4 +106,47 @@ export const reqPermissionUpdate = (permId, params) => { return axios.put(`${bas
 //删除权限
 export const reqPermissionDelete = permIds => { return axios.delete(`${baseUrl}/permission/` + permIds).then(res => res.data) }
 
+/**
+ * 日志管理
+ */
 
+//日志分页查询
+export const reqLogListPage = (method, data, params) => {
+  return axios({
+    url: `${baseUrl}/log/listPage`,
+    method: method,
+    data: data,
+    params: params
+  }).then(res => res.data)
+}
+
+//删除日志
+export const reqLogDelete = ids => { return axios.delete(`${baseUrl}/log/` + ids).then(res => res.data) }
+
+//查询一个日志信息
+export const reqLogInfo = id => { return axios.get(`${baseUrl}/log/` + id).then(res => res.data) }
+
+/**
+ * 配置管理
+ */
+//配置分页查询
+export const configListPage = (method, data, params) => {
+  return axios({
+    url: `${baseUrl}/config/listPage`,
+    method: method,
+    data: data,
+    params: params
+  }).then(res => res.data)
+}
+
+//添加配置
+export const reqConfigSave = params => { return axios.post(`${baseUrl}/config`, params).then(res => res.data) }
+
+//查询一个配置信息
+export const reqConfigInfo = configId => { return axios.get(`${baseUrl}/config/` + configId).then(res => res.data) }
+
+//修改配置
+export const reqConfigUpdate = (configId, params) => { return axios.put(`${baseUrl}/config/` + configId, params).then(res => res.data) }
+
+//删除配置
+export const reqConfigDelete = configIds => { return axios.delete(`${baseUrl}/config/` + configIds).then(res => res.data) }

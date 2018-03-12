@@ -76,6 +76,8 @@
 
 </template>
 <script>
+  import { configListPage, reqConfigSave, reqConfigInfo, reqConfigUpdate, reqConfigDelete } from '@/api/api'
+
   export default {
     name: 'config',
     data () {
@@ -153,12 +155,7 @@
         if (this.pageParam.sidx === null) {
           this.pageParam.sidx = 'id'
         }
-        this.$http({
-          url: '/api/config/listPage',
-          method: this.advancedSearch ? 'post' : 'get',
-          data: this.queryParam,
-          params: this.advancedSearch ? this.pageParam : {...this.pageParam, ...this.pageQuery}
-        }).then(response => {
+        configListPage(this.queryParam, this.advancedSearch ? this.pageParam : {...this.pageParam, ...this.pageQuery}).then(response => {
           let {code, msg, result} = response.data
           if (code === 0) {
             this.currCol = null
@@ -227,50 +224,47 @@
       doSave () {
         this.$refs['sysConfig'].validate((valid) => {
           if (valid) {
-            this.$http.post('/api/config/', this.sysConfig)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('添加成功！')
-                  this.resetForm('sysConfig')
-                  this.addConfigVisible = false
-                  this.getConfigList()
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqConfigSave(this.sysConfig).then(response => {
+              if (response.data.code === 0) {
+                this.$Message.success('添加成功！')
+                this.resetForm('sysConfig')
+                this.addConfigVisible = false
+                this.getConfigList()
+              } else {
+                this.$Message.warning(response.data.msg)
+              }
+            })
           }
         })
       },
       openEdit (row) {
         this.operationType = 1
         if (this.currCol !== null) {
-          this.$http.get('/api/config/' + this.currCol.id)
-            .then(response => {
-              let {code, msg, result} = response.data
-              if (code === 0) {
-                this.sysConfig = result
-                this.addConfigVisible = true
-              } else {
-                this.$Message.warning(msg)
-              }
-            })
+          reqConfigInfo(this.currCol.id).then(response => {
+            let {code, msg, result} = response.data
+            if (code === 0) {
+              this.sysConfig = result
+              this.addConfigVisible = true
+            } else {
+              this.$Message.warning(msg)
+            }
+          })
         }
       },
       //执行更新操作
       doUpdate () {
         this.$refs['sysConfig'].validate((valid) => {
           if (valid) {
-            this.$http.put('/api/config/' + this.sysConfig.id, this.sysConfig)
-              .then(response => {
-                if (response.data.code === 0) {
-                  this.$Message.success('修改成功！')
-                  this.resetForm('sysConfig')
-                  this.addConfigVisible = false
-                  this.getConfigList()
-                } else {
-                  this.$Message.warning(response.data.msg)
-                }
-              })
+            reqConfigUpdate(this.sysConfig.id, this.sysConfig).then(response => {
+              if (response.data.code === 0) {
+                this.$Message.success('修改成功！')
+                this.resetForm('sysConfig')
+                this.addConfigVisible = false
+                this.getConfigList()
+              } else {
+                this.$Message.warning(response.data.msg)
+              }
+            })
           }
         })
       },
@@ -285,15 +279,14 @@
               this.currList.forEach(function (value, index, array) {
                 idList.push(value.id)
               })
-              this.$http.delete('/api/config/' + idList)
-                .then(response => {
-                  if (response.data.code === 0) {
-                    this.$Message.success('删除成功！')
-                    this.getConfigList()
-                  } else {
-                    this.$Message.warning(response.data.msg)
-                  }
-                })
+              reqConfigDelete(idList).then(response => {
+                if (response.data.code === 0) {
+                  this.$Message.success('删除成功！')
+                  this.getConfigList()
+                } else {
+                  this.$Message.warning(response.data.msg)
+                }
+              })
             }
           })
         }

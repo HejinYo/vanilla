@@ -81,6 +81,8 @@
 </template>
 
 <script>
+  import { reqLogListPage, reqLogDelete, reqLogInfo } from '@/api/api'
+
   export default {
     name: 'sysLog',
     data () {
@@ -138,13 +140,8 @@
           this.pageParam.sidx = 'createTime'
           this.pageParam.sort = 'desc'
         }
-        this.$http({
-          url: '/api/log/listPage',
-          method: this.advancedSearch ? 'post' : 'get',
-          data: this.queryParam,
-          params: this.advancedSearch ? this.pageParam : {...this.pageParam, ...this.pageQuery}
-        }).then(response => {
-          let {code, msg, result} = response.data
+        reqLogListPage(this.queryParam, this.advancedSearch ? this.pageParam : {...this.pageParam, ...this.pageQuery}).then(data => {
+          let {code, msg, result} = data
           if (code === 0) {
             this.currCol = null
             this.logList = result.list
@@ -200,31 +197,29 @@
               this.currList.forEach(function (value, index, array) {
                 logIdList.push(value.id)
               })
-              this.$http.delete('/api/log/' + logIdList)
-                .then(response => {
-                  if (response.data.code === 0) {
-                    this.$Message.success('删除成功！')
-                    this.getLogList()
-                  } else {
-                    this.$Message.warning(response.data.msg)
-                  }
-                })
+              reqLogDelete(logIdList).then(response => {
+                if (response.data.code === 0) {
+                  this.$Message.success('删除成功！')
+                  this.getLogList()
+                } else {
+                  this.$Message.warning(response.data.msg)
+                }
+              })
             }
           })
         }
       },
       //打开日志详情
       logInfo (row) {
-        this.$http.get('/api/log/' + row.id)
-          .then(response => {
-            let {code, msg, result} = response.data
-            if (code === 0) {
-              this.sysLog = result
-              this.logInfoVisible = true
-            } else {
-              this.$Message.warning(msg)
-            }
-          })
+        reqLogInfo(row.id).then(response => {
+          let {code, msg, result} = response.data
+          if (code === 0) {
+            this.sysLog = result
+            this.logInfoVisible = true
+          } else {
+            this.$Message.warning(msg)
+          }
+        })
       }
     }
   }
