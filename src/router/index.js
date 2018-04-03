@@ -103,32 +103,32 @@ const processMenu = (value) => {
         item.icon = auth.micon ? auth.micon : item.icon
         if (item.children.length === 1) {
           let child = item.children[0]
-          let authItem = Util.getMenuAuth(auth.children, child.name)
-          item.children[0].icon = authItem.micon ? authItem.micon : item.children[0].icon
-          if (child.meta.requireAuth) {
-            if (authItem) {
+          if (!child.meta.requireAuth) {
               menuList.push(item)
-              currAuth.push(child.name)
-            }
           } else {
-            menuList.push(item)
+            let authItem = Util.getMenuAuth(auth.children, child.name)
+            if (authItem) {
+                menuList.push(item)
+                currAuth.push(child.name)
+                item.children[0].icon = authItem.micon ? authItem.micon : item.children[0].icon
+            }
           }
         } else {
           let len = menuList.push(item)
           let childrenArr = []
           //检查子路由是否拥有权限
           childrenArr = item.children.filter(child => {
-            let authItem = Util.getMenuAuth(auth.children, child.name)
-            child.icon = authItem.micon ? authItem.micon : child.icon
-            if (child.meta.requireAuth) {
+            if (!child.meta.requireAuth) {
+              //子路由不需要权限
+              return child
+            } else {
               if (authItem) {
+                let authItem = Util.getMenuAuth(auth.children, child.name)
+                child.icon = authItem.micon ? authItem.micon : child.icon
                 //子路由需要权限，并且用户拥有此权限
                 currAuth.push(child.name)
                 return child
               }
-            } else {
-              //子路由不需要权限
-              return child
             }
           })
           menuList[len - 1].children = childrenArr
