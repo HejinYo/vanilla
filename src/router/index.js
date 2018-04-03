@@ -122,8 +122,8 @@ const processMenu = (value) => {
               //子路由不需要权限
               return child
             } else {
+              let authItem = Util.getMenuAuth(auth.children, child.name)
               if (authItem) {
-                let authItem = Util.getMenuAuth(auth.children, child.name)
                 child.icon = authItem.micon ? authItem.micon : child.icon
                 //子路由需要权限，并且用户拥有此权限
                 currAuth.push(child.name)
