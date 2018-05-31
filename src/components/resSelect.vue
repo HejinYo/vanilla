@@ -63,27 +63,27 @@
       ...mapActions([
         'getResData'
       ]),
-      //部门级联选择
+      // 部门级联选择
       resTreeChange (data, node, object) {
         this.$emit('resChange', data)
       }
     },
     mounted () {
       this.$nextTick(() => {
-          this.getResData(this.refresh).then(value => {
+        this.getResData(this.refresh).then(value => {
+          this.resData = value
+          if (this.rootNode) {
             this.resData = value
-            if (this.rootNode) {
-              this.resData = value
-            } else {
-              if (value.tree.length > 0) {
-                this.resData.tree = value.tree[0].children
-                let list = JSON.parse(JSON.stringify(value.list))
-                list.splice(0, 1)
-                this.resData.list = list
-              }
+          } else {
+            if (value.tree.length > 0) {
+              this.resData.tree = value.tree[0].children
+              let list = JSON.parse(JSON.stringify(value.list))
+              list.splice(0, 1)
+              this.resData.list = list
             }
-          })
-        }
+          }
+        })
+      }
       )
     }
   }

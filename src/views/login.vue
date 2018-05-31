@@ -66,7 +66,7 @@
                 Cookies.set('user', this.account.username)
                 this.$store.commit('setAvator', 'http://ow1prafcd.bkt.clouddn.com/hejinyo.jpg')
                 this.$router.replace({
-                  //path: decodeURIComponent(this.$route.query.redirect || '/home')
+                  // path: decodeURIComponent(this.$route.query.redirect || '/home')
                   path: decodeURIComponent('/home')
                 })
               } else {

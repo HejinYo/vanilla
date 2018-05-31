@@ -145,13 +145,13 @@
     data () {
       return {
         listLoading: false,
-        //表格数据
+        // 表格数据
         roleList: [],
-        //当前选择行
+        // 当前选择行
         currCol: null,
-        //列表选中行
+        // 列表选中行
         currList: [],
-        //分页查询参数
+        // 分页查询参数
         pageParam: {
           total: 0,
           pageNum: 1,
@@ -159,14 +159,14 @@
           sidx: null,
           sort: null
         },
-        //查询参数
+        // 查询参数
         pageQuery: {
           queryKey: 'roleName',
           queryValue: null
         },
-        //高级查询
+        // 高级查询
         advancedSearch: false,
-        //高级查询参数
+        // 高级查询参数
         queryParam: {},
         sysRole: {
           roleName: null,
@@ -174,7 +174,7 @@
           roleDescription: null,
           state: 0
         },
-        //新增界面是否显示
+        // 新增界面是否显示
         addRoleVisible: false,
         addRoleForm: {
           roleName: '',
@@ -190,11 +190,11 @@
             {required: true, message: '不能为空', trigger: 'blur'}
           ]
         },
-        //显示授权
+        // 显示授权
         permissionVisible: false,
-        //资源树
+        // 资源树
         resourceTreeData: [],
-        //角色权限
+        // 角色权限
         rolePermisson: [],
         treeProps: {
           children: 'children',
@@ -220,10 +220,10 @@
       })
     },
     methods: {
-      //加载角色列表
+      // 加载角色列表
       getRoleList () {
         this.listLoading = true
-        //默认排序
+        // 默认排序
         if (this.pageParam.sidx === null) {
           this.pageParam.sidx = 'roleId'
         }
@@ -241,9 +241,8 @@
             this.listLoading = false
           }, 100)
         })
-
       },
-      //获取角色拥有权限
+      // 获取角色拥有权限
       reqRolePermission (roleId) {
         reqRolePerm(roleId).then(data => {
           let {code, msg, result} = data
@@ -253,7 +252,7 @@
           }
         })
       },
-      //加载权限树
+      // 加载权限树
       getPermissionTree () {
         reqPermissionTree().then(data => {
           let {code, msg, result} = data
@@ -262,31 +261,31 @@
           }
         })
       },
-      //点击页码事件，翻页操作
+      // 点击页码事件，翻页操作
       currentChange (val) {
         this.pageParam.pageNum = val
         this.getRoleList()
       },
-      //多选事件
+      // 多选事件
       selectionRow (val) {
         this.currList = val
       },
-      //改变分页数量
+      // 改变分页数量
       sizeChange (val) {
         this.pageParam.pageSize = val
         this.getRoleList()
       },
-      //排序
+      // 排序
       sortChange (val) {
         this.pageParam.sidx = val.prop
         this.pageParam.sort = val.order
         this.getRoleList()
       },
-      //点击表格行事件
+      // 点击表格行事件
       clickRow (val) {
         this.currCol = val
       },
-      //操作
+      // 操作
       operation (flag) {
         if (flag) {
           if (this.operationType === 0) {
@@ -295,24 +294,24 @@
             this.doUpdate()
           }
         } else {
-          //取消操作
+          // 取消操作
           if (this.operationType === 0) {
             this.resetForm('sysRole')
           }
           this.addRoleVisible = false
         }
       },
-      //重置表格
+      // 重置表格
       resetForm (formName) {
         this.$refs[formName].resetFields()
       },
-      //显示新增界面
+      // 显示新增界面
       openSave: function () {
         this.operationType = 0
         this.sysRole = JSON.parse(JSON.stringify(this.addRoleForm))
         this.addRoleVisible = true
       },
-      //执行增加操作
+      // 执行增加操作
       doSave () {
         this.$refs['sysRole'].validate((valid) => {
           if (valid) {
@@ -344,7 +343,7 @@
           })
         }
       },
-      //执行更新操作
+      // 执行更新操作
       doUpdate () {
         this.$refs['sysRole'].validate((valid) => {
           if (valid) {
@@ -362,7 +361,7 @@
           }
         })
       },
-      //执行 删除操作
+      // 执行 删除操作
       doDelete () {
         if (this.currList.length > 0) {
           this.$Modal.confirm({
@@ -405,17 +404,17 @@
       resetChecked () {
         this.$refs.tree.setCheckedKeys([])
       },
-      //查询
+      // 查询
       searchRole () {
         if (this.pageQuery.queryValue) {
           this.getRoleList()
         }
       },
-      //查询重置
+      // 查询重置
       searchRset () {
         this.pageQuery.queryValue = null
         this.getRoleList()
-      },
+      }
     }
   }
 </script>

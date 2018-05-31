@@ -40,7 +40,7 @@ const app = {
     decrement (state) {
       state.count--
     },
-    //清除所有数据
+    // 清除所有数据
     cleanAll (state) {
       state.pageOpenedList.splice(1)
       state.cachePage.length = 0
@@ -52,7 +52,7 @@ const app = {
     setTagsList (state, list) {
       state.tagsList.push(...list)
     },
-    //设置菜单
+    // 设置菜单
     setMenuList (state, data) {
       state.menuList = data
     },
@@ -82,7 +82,7 @@ const app = {
         }
       })
     },
-    //缓存页面
+    // 缓存页面
     initCachepage (state) {
       if (localStorage.cachePage) {
         state.cachePage = JSON.parse(localStorage.cachePage)
@@ -130,7 +130,7 @@ const app = {
       })
       localStorage.pageOpenedList = JSON.stringify(state.pageOpenedList)
     },
-    //设置页面打开列表
+    // 设置页面打开列表
     setOpenedList (state) {
       state.pageOpenedList = localStorage.pageOpenedList ? JSON.parse(localStorage.pageOpenedList) : [otherRouter.children[0]]
     },
@@ -140,7 +140,7 @@ const app = {
     setCurrentPageName (state, name) {
       state.currentPageName = name
     },
-    //设置用户头像
+    // 设置用户头像
     setAvator (state, path) {
       localStorage.avatorImgPath = path
     },
@@ -164,15 +164,15 @@ const app = {
     }
   },
   actions: {
-    increment: ({commit}) => {//执行多个 mutations 就需要用 action ,可以在这里触发其他的mutations方法
+    increment: ({commit}) => { // 执行多个 mutations 就需要用 action ,可以在这里触发其他的mutations方法
       commit('increment')
     },
-    decrement: ({commit}) => {//执行多个 mutations 就需要用 action ,可以在这里触发其他的mutations方法
+    decrement: ({commit}) => { // 执行多个 mutations 就需要用 action ,可以在这里触发其他的mutations方法
       commit('decrement')
     }
   },
   getters: {
-    count: state => {//相当于计算属性，可以自定义state所相关的属性，比如取反
+    count: state => { // 相当于计算属性，可以自定义state所相关的属性，比如取反
       return state.count
     }
   }

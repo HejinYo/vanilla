@@ -64,29 +64,49 @@ export const otherRouter = {
   component: Main,
   children: [
     {
-      path: 'home', name: 'home_index', title: {i18n: 'home'}, meta: {requireAuth: true}, component: resolve => {
-      require(['@/views/home/home.vue'], resolve)
-    }
+      path: 'home',
+      name: 'home_index',
+      title: {i18n: 'home'},
+      meta: {requireAuth: true},
+      component: resolve => {
+        require(['@/views/home/home.vue'], resolve)
+      }
     },
     {
-      path: 'ownspace', name: 'ownspace_index', title: '个人中心', meta: {requireAuth: true}, component: resolve => {
-      require(['@/views/own-space/own-space.vue'], resolve)
-    }
+      path: 'ownspace',
+      name: 'ownspace_index',
+      title: '个人中心',
+      meta: {requireAuth: true},
+      component: resolve => {
+        require(['@/views/own-space/own-space.vue'], resolve)
+      }
     },
     {
-      path: 'order/:order_id', name: 'order-info', title: '订单详情', meta: {requireAuth: true}, component: resolve => {
-      require(['@/views/advanced-router/component/order-info.vue'], resolve)
-    }
+      path: 'order/:order_id',
+      name: 'order-info',
+      title: '订单详情',
+      meta: {requireAuth: true},
+      component: resolve => {
+        require(['@/views/advanced-router/component/order-info.vue'], resolve)
+      }
     }, // 用于展示动态路由
     {
-      path: 'shopping', name: 'shopping', title: '购物详情', meta: {requireAuth: true}, component: resolve => {
-      require(['@/views/advanced-router/component/shopping-info.vue'], resolve)
-    }
+      path: 'shopping',
+      name: 'shopping',
+      title: '购物详情',
+      meta: {requireAuth: true},
+      component: resolve => {
+        require(['@/views/advanced-router/component/shopping-info.vue'], resolve)
+      }
     }, // 用于展示带参路由
     {
-      path: 'message', name: 'message_index', title: '消息中心', meta: {requireAuth: true}, component: resolve => {
-      require(['@/views/message/message.vue'], resolve)
-    }
+      path: 'message',
+      name: 'message_index',
+      title: '消息中心',
+      meta: {requireAuth: true},
+      component: resolve => {
+        require(['@/views/message/message.vue'], resolve)
+      }
     }
   ]
 }
@@ -334,9 +354,10 @@ export const appRouter = [
         name: 'artical-publish',
         title: '文章发布',
         meta: {requireAuth: true},
-        icon: 'compose', component: resolve => {
-        require(['@/views/form/article-publish/article-publish.vue'], resolve)
-      }
+        icon: 'compose',
+        component: resolve => {
+          require(['@/views/form/article-publish/article-publish.vue'], resolve)
+        }
       },
       {
         path: 'workflow',

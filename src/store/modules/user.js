@@ -3,14 +3,14 @@ import axios from '@/libs/axios'
 
 const user = {
   state: {
-    loginUser: {}, //当前登录用户
-    userAuth: [], //来自服务器的用户权限
-    currAuth: [], //本地路由授权的全心爱你
-    completeAuth: false, //是否完成路由授权
-    avatorImgPath: ''//用户头像地址
+    loginUser: {}, // 当前登录用户
+    userAuth: [], // 来自服务器的用户权限
+    currAuth: [], // 本地路由授权的全心爱你
+    completeAuth: false, // 是否完成路由授权
+    avatorImgPath: ''// 用户头像地址
   },
   mutations: {
-    //刷新页面重新获取用户信息
+    // 刷新页面重新获取用户信息
     setLoginUser (state) {
       axios.get('/api/userInfo')
         .then(response => {
@@ -20,7 +20,7 @@ const user = {
           console.log(result)
         })
     },
-    //登录设置状态
+    // 登录设置状态
     login (state, data) {
       state.completeAuth = false
       localStorage.userToken = data.userToken
@@ -54,11 +54,11 @@ const user = {
     }
   },
   actions: {
-    logout: ({commit}) => {//执行多个 mutations 就需要用 action ,可以在这里触发其他的mutations方法
+    logout: ({commit}) => { // 执行多个 mutations 就需要用 action ,可以在这里触发其他的mutations方法
       commit('logout')
     }
   },
-  //相当于计算属性，可以自定义state所相关的属性，比如取反
+  // 相当于计算属性，可以自定义state所相关的属性，比如取反
   getters: {
     loginUser: state => {
       return state.loginUser

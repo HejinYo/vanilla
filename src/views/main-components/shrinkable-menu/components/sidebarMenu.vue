@@ -42,24 +42,24 @@
       }
     },
     methods: {
-      changeMenu(active) {
-        this.$emit('on-change', active);
+      changeMenu (active) {
+        this.$emit('on-change', active)
       },
-      itemTitle(item) {
+      itemTitle (item) {
         if (typeof item.title === 'object') {
-          return this.$t(item.title.i18n);
+          return this.$t(item.title.i18n)
         } else {
-          return item.title;
+          return item.title
         }
       }
     },
-    updated() {
+    updated () {
       this.$nextTick(() => {
         if (this.$refs.sideMenu) {
-          this.$refs.sideMenu.updateOpened();
+          this.$refs.sideMenu.updateOpened()
         }
-      });
-    }
+      })
+  }
 
-  };
+  }
 </script>

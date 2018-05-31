@@ -2,13 +2,13 @@ import axios from '@/libs/axios'
 
 const data = {
   state: {
-    //角色列表
+    // 角色列表
     roleList: [],
-    //资源数据
+    // 资源数据
     resData: {
-      tree: [], //树
-      list: [], //列表
-    },
+      tree: [], // 树
+      list: [] // 列表
+    }
   },
   mutations: {
     setRoleList (state, result) {
@@ -16,10 +16,10 @@ const data = {
     },
     setResData (state, result) {
       state.resData = result
-    },
+    }
   },
   actions: {
-    //refresh: true 每次都去服务器获取， false:如果存在，则用内存中的
+    // refresh: true 每次都去服务器获取， false:如果存在，则用内存中的
     getRoleList: async ({state, commit}, refresh) => {
       return await new Promise(function (resolve, reject) {
         if (state.roleList.length === 0 || refresh) {
@@ -37,7 +37,7 @@ const data = {
         }
       })
     },
-    //refresh: true 每次都去服务器获取， false:如果存在，则用内存中的
+    // refresh: true 每次都去服务器获取， false:如果存在，则用内存中的
     getResData: async ({state, commit}, refresh) => {
       return await new Promise(function (resolve, reject) {
         if (state.resData.tree.length === 0 || refresh) {
@@ -54,9 +54,9 @@ const data = {
           resolve(state.resData)
         }
       })
-    },
+    }
   },
-  //相当于计算属性，可以自定义state所相关的属性，比如取反
+  // 相当于计算属性，可以自定义state所相关的属性，比如取反
   getters: {
     resDataList: state => {
       return state.resData.list

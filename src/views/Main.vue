@@ -122,7 +122,7 @@
     },
     methods: {
       init () {
-        //刷新页面重新获取用户信息
+        // 刷新页面重新获取用户信息
         this.$store.commit('setLoginUser')
         let pathArr = util.setCurrentPath(this, this.$route.name)
         if (pathArr.length >= 2) {

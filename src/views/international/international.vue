@@ -69,66 +69,66 @@
 
 <script>
 export default {
-    name: 'international_index',
-    data () {
-        return {
-            lang: 'zh-CN',
-            valueText: 3,
-            showModal: false,
-            columnsI18n: [
-                {
-                    key: 'name',
-                    title: this.$t('name')
-                },
-                {
-                    key: 'company',
-                    title: this.$t('company')
-                }
-            ],
-            dataI18n: [
-                {
-                    name: 'Aresn',
-                    company: 'TalkingData'
-                },
-                {
-                    name: 'Lison',
-                    company: 'TalkingData'
-                },
-                {
-                    name: 'Lucy',
-                    company: 'TalkingData'
-                }
-            ]
-        };
-    },
-    methods: {
-        handleSwitch (lang) {
-            this.lang = lang;
-            localStorage.lang = lang;
-            this.$store.commit('switchLang', lang); // 如果你要自己实现多语言切换，那么只需要执行这行代码即可，修改语言类型
-
-            this.columnsI18n = [
-                {
-                    key: 'name',
-                    title: this.$t('name')
-                },
-                {
-                    key: 'company',
-                    title: this.$t('company')
-                }
-            ]; // 像iview的table组件这样一次渲染如果数据不更新视图就不更新的组件，如果切换语言需要更新一下数据才能切换组件内的多语言
-        }
-    },
-    computed: {
-        placeholderText () {
-            return this.$t('placeholderText');
+  name: 'international_index',
+  data () {
+    return {
+      lang: 'zh-CN',
+      valueText: 3,
+      showModal: false,
+      columnsI18n: [
+        {
+          key: 'name',
+          title: this.$t('name')
         },
-        placeholderDate () {
-            return this.$t('placeholderDate');
+        {
+          key: 'company',
+          title: this.$t('company')
         }
-    },
-    created () {
-        this.lang = localStorage.lang || 'zh-CN';
+      ],
+      dataI18n: [
+        {
+          name: 'Aresn',
+          company: 'TalkingData'
+        },
+        {
+          name: 'Lison',
+          company: 'TalkingData'
+        },
+        {
+          name: 'Lucy',
+          company: 'TalkingData'
+        }
+      ]
     }
-};
+  },
+  methods: {
+    handleSwitch (lang) {
+      this.lang = lang
+      localStorage.lang = lang
+      this.$store.commit('switchLang', lang) // 如果你要自己实现多语言切换，那么只需要执行这行代码即可，修改语言类型
+
+      this.columnsI18n = [
+        {
+          key: 'name',
+          title: this.$t('name')
+        },
+        {
+          key: 'company',
+          title: this.$t('company')
+        }
+      ] // 像iview的table组件这样一次渲染如果数据不更新视图就不更新的组件，如果切换语言需要更新一下数据才能切换组件内的多语言
+    }
+  },
+  computed: {
+    placeholderText () {
+      return this.$t('placeholderText')
+    },
+    placeholderDate () {
+      return this.$t('placeholderDate')
+    }
+  },
+  created () {
+    this.lang = localStorage.lang || 'zh-CN'
+  }
+}
 </script>

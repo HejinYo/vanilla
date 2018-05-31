@@ -227,7 +227,7 @@
     components: {
       'edit-tree': editTree,
       'icon-select': iconSelect,
-      'res-select': resSelect,
+      'res-select': resSelect
     },
     computed: {
       resShowEdit () {
@@ -245,24 +245,24 @@
     },
     data () {
       return {
-        //资源树数据
+        // 资源树数据
         resTreeData: [],
-        //资源树当前节点
+        // 资源树当前节点
         currNode: {},
-        //资源树查询
+        // 资源树查询
         filterText: '',
-        //资源树默认展开节点
+        // 资源树默认展开节点
         resTreeExpandedKeys: [0],
-        //查询参数
+        // 查询参数
         queryParam: {
           resId: null
         },
-        //当前table页
+        // 当前table页
         currTabs: 'resource',
-        //资源表格数据
+        // 资源表格数据
         resList: [],
         resLoading: false,
-        //资源分页查询参数
+        // 资源分页查询参数
         resPageParam: {
           total: 0,
           pageNum: 1,
@@ -270,14 +270,14 @@
           sidx: null,
           sort: null
         },
-        //资源查询参数
+        // 资源查询参数
         resPageQuery: {
           queryKey: 'resName',
           queryValue: null
         },
-        //资源当前选择行
+        // 资源当前选择行
         resCurrCol: null,
-        //资源操作类型
+        // 资源操作类型
         resOpsType: 0,
         resVisible: false,
         sysResource: {
@@ -314,15 +314,15 @@
             {required: true, message: '类型不能为空', trigger: 'blur'}
           ]
         },
-        /*************权限START*************/
+        /** ***********权限START*************/
         permOpsType: 0,
         permVisible: false,
         permLoading: false,
-        //权限表格数据
+        // 权限表格数据
         permList: [],
-        //资源当前选择行
+        // 资源当前选择行
         permCurrCol: null,
-        //权限分页查询参数
+        // 权限分页查询参数
         permPageParam: {
           total: 0,
           pageNum: 1,
@@ -330,7 +330,7 @@
           sidx: null,
           sort: null
         },
-        //权限查询参数
+        // 权限查询参数
         permPageQuery: {
           queryKey: 'permName',
           queryValue: null
@@ -364,26 +364,26 @@
             {required: true, message: '请选择资源', trigger: 'change'}
           ]
         },
-        /*************权限END*************/
-        //权限下拉菜单
+        /** ***********权限END*************/
+        // 权限下拉菜单
         permission: [
           {
             value: 'view',
-            text: '查看',
+            text: '查看'
           },
           {
             value: 'create',
-            text: '添加',
+            text: '添加'
           },
           {
             value: 'update',
-            text: '修改',
+            text: '修改'
           },
           {
             value: 'delete',
-            text: '删除',
-          },
-        ],
+            text: '删除'
+          }
+        ]
       }
     },
     mounted: function () {
@@ -393,11 +393,11 @@
       })
     },
     methods: {
-      //树添加按钮事件
+      // 树添加按钮事件
       resTreeAdd (data, node) {
         data.resId !== 0 ? this.openSave(data, node) : this.resOpenSave(data, node)
       },
-      //加载资源树
+      // 加载资源树
       getResTree () {
         reqResourceTree().then(data => {
           let {code, msg, result} = data
@@ -409,10 +409,10 @@
           }
         })
       },
-      //加载资源列表
+      // 加载资源列表
       getResList () {
         this.resLoading = true
-        //默认排序
+        // 默认排序
         if (this.resPageParam.sidx === null) {
           this.resPageParam.sidx = 'resPid,seq'
         }
@@ -431,10 +431,10 @@
           }, 100)
         })
       },
-      //加载权限列表
+      // 加载权限列表
       getPermList () {
         this.permLoading = true
-        //默认排序
+        // 默认排序
         if (this.permPageParam.sidx === null) {
           this.permPageParam.sidx = 'resId'
         }
@@ -453,7 +453,7 @@
           }, 100)
         })
       },
-      //table页切换
+      // table页切换
       tabsChange (name) {
         if (name === 'resource') {
           this.getResList()
@@ -461,7 +461,7 @@
           this.getPermList()
         }
       },
-      //资源树点击事件
+      // 资源树点击事件
       treeDataChange (data, node) {
         console.log(node)
         this.currNode = node
@@ -473,7 +473,7 @@
           this.getPermList()
         }
       },
-      //权限下拉菜单点击事件
+      // 权限下拉菜单点击事件
       permCodeSelect (value) {
         let permName = this.sysPermission.permName
         if (permName.indexOf('-') > 0) {
@@ -490,22 +490,22 @@
         this.resPageParam.pageNum = val
         this.getResList()
       },
-      //资源改变分页数量
+      // 资源改变分页数量
       resSizeChange (val) {
         this.resPageParam.pageSize = val
         this.getResList()
       },
-      //资源排序
+      // 资源排序
       resSortChange (val) {
         this.resPageParam.sidx = val.prop
         this.resPageParam.sort = val.order
         this.getResList()
       },
-      //资源表格点击行事件
+      // 资源表格点击行事件
       resClickRow (val) {
         this.resCurrCol = val
       },
-      //添加资源
+      // 添加资源
       resOpenSave (data, node) {
         this.currNode = node
         this.resetForm('sysResource')
@@ -524,7 +524,7 @@
         this.resVisible = true
         this.resOpsType = 0
       },
-      //修改资源
+      // 修改资源
       resOpenEdit (val) {
         this.resOpsType = 1
         if (this.resCurrCol !== null) {
@@ -539,7 +539,7 @@
           })
         }
       },
-      //资源请求处理
+      // 资源请求处理
       resOperation () {
         if (this.resOpsType === 0) {
           this.doSaveRes()
@@ -563,7 +563,7 @@
           }
         })
       },
-      //执行更新操作
+      // 执行更新操作
       doUpdateRes () {
         this.$refs['sysResource'].validate((valid) => {
           if (valid) {
@@ -581,7 +581,7 @@
           }
         })
       },
-      //执行单个删除操作
+      // 执行单个删除操作
       doDelRes (data, node) {
         this.$Modal.confirm({
           title: '提示',
@@ -602,7 +602,7 @@
       selectIcon (icon) {
         this.sysResource.resIcon = icon
       },
-      //查询
+      // 查询
       search () {
         if (this.currTabs === 'resource') {
           if (this.resPageQuery.queryValue) {
@@ -614,7 +614,7 @@
           }
         }
       },
-      //查询重置
+      // 查询重置
       searchRset () {
         this.queryParam.resId = null
         if (this.currTabs === 'resource') {
@@ -625,40 +625,40 @@
           this.getPermList()
         }
       },
-      //资源级联选择
+      // 资源级联选择
       resSelectChange (data) {
         this.sysResource.resPid = data.resId
       },
-      //权限级联选择
+      // 权限级联选择
       permSelectChange (data) {
         this.sysPermission.resId = data.resId
       },
-      /*8888888888888888888888888888888888888888888888888888888888888888888888888888888888*/
-      //权限表格点击行事件
+      /* 8888888888888888888888888888888888888888888888888888888888888888888888888888888888 */
+      // 权限表格点击行事件
       permClickRow (val) {
         this.permCurrCol = val
       },
-      //权限翻页操作
+      // 权限翻页操作
       permPageChange (val) {
         this.permPageParam.pageNum = val
         this.getPermList()
       },
-      //权限改变分页数量
+      // 权限改变分页数量
       permSizeChange (val) {
         this.permPageParam.pageSize = val
         this.getPermList()
       },
-      //权限排序
+      // 权限排序
       permSortChange (val) {
         this.permPageParam.sidx = val.prop
         this.permPageParam.sort = val.order
         this.getPermList()
       },
-      //重置表格
+      // 重置表格
       resetForm (formName) {
         this.$refs[formName].resetFields()
       },
-      //添加权限
+      // 添加权限
       permOpenSave (data, node) {
         this.currNode = node
         this.permOpsType = 0
@@ -668,7 +668,7 @@
         this.permVisible = true
         this.resetForm('sysPermission')
       },
-      //修改权限
+      // 修改权限
       permOpenEdit () {
         this.permOpsType = 1
         if (this.permCurrCol !== null) {
@@ -683,7 +683,7 @@
           })
         }
       },
-      //权限请求处理
+      // 权限请求处理
       permOperation () {
         if (this.permOpsType === 0) {
           this.doSavePerm()
@@ -691,7 +691,7 @@
           this.doUpdatePerm()
         }
       },
-      //执行权限添加
+      // 执行权限添加
       doSavePerm () {
         this.$refs['sysPermission'].validate((valid) => {
           if (valid) {
@@ -708,7 +708,7 @@
           }
         })
       },
-      //执行权限更新
+      // 执行权限更新
       doUpdatePerm () {
         this.$refs['sysPermission'].validate((valid) => {
           if (valid) {
@@ -725,7 +725,7 @@
           }
         })
       },
-      //执行单个删除操作
+      // 执行单个删除操作
       doDelPerm () {
         this.$Modal.confirm({
           title: '提示',
@@ -742,7 +742,7 @@
           }
         })
       },
-      //树节点添加资源或权限
+      // 树节点添加资源或权限
       openSave (data, node) {
         if (this.currTabs === 'resource') {
           this.resOpenSave(data, node)
@@ -750,7 +750,7 @@
           this.permOpenSave(data, node)
         }
       },
-      //树节点回显
+      // 树节点回显
       echoTree (type) {
         if (type === 'delete') {
           this.treeDataChange(this.currNode.parent.data, this.currNode)
@@ -776,9 +776,8 @@
         if (!value) return true
         return data.resName.indexOf(value) !== -1
       }
-    }
-    ,
-    watch: {
+    },
+  watch: {
       filterText (val) {
         this.$refs.resTree.filter(val)
       }

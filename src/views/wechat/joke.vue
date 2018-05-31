@@ -77,13 +77,13 @@
     data () {
       return {
         listLoading: false,
-        //表格数据
+        // 表格数据
         jokeList: [],
-        //当前选择行
+        // 当前选择行
         currCol: null,
-        //列表选中行
+        // 列表选中行
         currList: [],
-        //分页查询笑话
+        // 分页查询笑话
         pageParam: {
           total: 0,
           pageNum: 1,
@@ -91,20 +91,20 @@
           sidx: null,
           sort: null
         },
-        //查询笑话
+        // 查询笑话
         pageQuery: {
           queryKey: 'title',
           queryValue: null
         },
-        //高级查询
+        // 高级查询
         advancedSearch: false,
-        //高级查询笑话
+        // 高级查询笑话
         queryParam: {},
         sysJoke: {
           title: null,
           content: null
         },
-        //新增界面是否显示
+        // 新增界面是否显示
         addJokeVisible: false,
         addJokeForm: {
           title: '',
@@ -138,10 +138,10 @@
       })
     },
     methods: {
-      //加载笑话列表
+      // 加载笑话列表
       getJokeList () {
         this.listLoading = true
-        //默认排序
+        // 默认排序
         if (this.pageParam.sidx === null) {
           this.pageParam.sidx = 'id'
         }
@@ -165,31 +165,31 @@
           }, 100)
         })
       },
-      //点击页码事件，翻页操作
+      // 点击页码事件，翻页操作
       currentChange (val) {
         this.pageParam.pageNum = val
         this.getJokeList()
       },
-      //多选事件
+      // 多选事件
       selectionRow (val) {
         this.currList = val
       },
-      //改变分页数量
+      // 改变分页数量
       sizeChange (val) {
         this.pageParam.pageSize = val
         this.getJokeList()
       },
-      //排序
+      // 排序
       sortChange (val) {
         this.pageParam.sidx = val.prop
         this.pageParam.sort = val.order
         this.getJokeList()
       },
-      //点击表格行事件
+      // 点击表格行事件
       clickRow (val) {
         this.currCol = val
       },
-      //操作
+      // 操作
       operation (flag) {
         if (flag) {
           if (this.operationType === 0) {
@@ -198,24 +198,24 @@
             this.doUpdate()
           }
         } else {
-          //取消操作
+          // 取消操作
           if (this.operationType === 0) {
             this.resetForm('sysJoke')
           }
           this.addJokeVisible = false
         }
       },
-      //重置表格
+      // 重置表格
       resetForm (formName) {
         this.$refs[formName].resetFields()
       },
-      //显示新增界面
+      // 显示新增界面
       openSave: function () {
         this.operationType = 0
         this.sysJoke = JSON.parse(JSON.stringify(this.addJokeForm))
         this.addJokeVisible = true
       },
-      //执行增加操作
+      // 执行增加操作
       doSave () {
         this.$refs['sysJoke'].validate((valid) => {
           if (valid) {
@@ -248,7 +248,7 @@
             })
         }
       },
-      //执行更新操作
+      // 执行更新操作
       doUpdate () {
         this.$refs['sysJoke'].validate((valid) => {
           if (valid) {
@@ -266,7 +266,7 @@
           }
         })
       },
-      //执行 删除操作
+      // 执行 删除操作
       doDelete () {
         if (this.currList.length > 0) {
           this.$Modal.confirm({
@@ -290,17 +290,17 @@
           })
         }
       },
-      //查询
+      // 查询
       searchJoke () {
         if (this.pageQuery.queryValue) {
           this.getJokeList()
         }
       },
-      //查询重置
+      // 查询重置
       searchRset () {
         this.pageQuery.queryValue = null
         this.getJokeList()
-      },
+      }
     }
   }
 </script>

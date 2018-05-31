@@ -211,7 +211,7 @@
           callback: action => {
             this.$message({
               type: 'info',
-              message: `action: ${ action }`
+              message: `action: ${action}`
             })
           }
         })
@@ -235,7 +235,7 @@
         this.option1.showCropedImage = true
       },
       handleSuccess (res, file, list) {
-        if ('finished' === file.status) {
+        if (file.status === 'finished') {
           this.$Message.success('上传成功!')
           file.url = file.response.result
         }
@@ -287,21 +287,21 @@
     mounted () {
       let img1 = document.getElementById('cropimg1')
       this.cropper1 = new Cropper(img1, {
-        /*'crop': create a new crop box
+        /* 'crop': create a new crop box
         'move': move the canvas
-        'none': do nothing*/
+        'none': do nothing */
         viewMode: '1',
         dragMode: 'crop',
-        aspectRatio: 1,//剪切比例
-        preview: '#preview1', //截图的显示位置
-        restore: false,//是否调整窗口大小后恢复裁剪区域。
-        center: true,//是否显示裁剪框 中间的+
-        highlight: false,//是否在剪裁框上显示白色的模态窗口。
-        /*cropBoxMovable: false,*///是否允许拖动裁剪框
-        /*toggleDragModeOnDblclick: false,*/
-        cropBoxMovable: true,//是否允许拖动裁剪框
-        cropBoxResizable: true,//是否允许拖动 改变裁剪框大小
-        movable: false,//是否允许移动图片
+        aspectRatio: 1, // 剪切比例
+        preview: '#preview1', // 截图的显示位置
+        restore: false, // 是否调整窗口大小后恢复裁剪区域。
+        center: true, // 是否显示裁剪框 中间的+
+        highlight: false, // 是否在剪裁框上显示白色的模态窗口。
+        /* cropBoxMovable: false, */// 是否允许拖动裁剪框
+        /* toggleDragModeOnDblclick: false, */
+        cropBoxMovable: true, // 是否允许拖动裁剪框
+        cropBoxResizable: true, // 是否允许拖动 改变裁剪框大小
+        movable: false// 是否允许移动图片
       })
 
       img1.addEventListener('crop', (e) => {
@@ -317,10 +317,8 @@
       this.$nextTick(function () {
         this.getFileList()
       })
-
     }
   }
-
 </script>
 <style lang="less">
   @import '../../assets/styles/common.less';

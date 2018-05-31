@@ -3,7 +3,7 @@ import { router } from '../../router'
 import Message from 'iview/src/components/message'
 import Notice from 'iview/src/components/notice'
 
-//https://www.kancloud.cn/yunye/axios/234845 详细配置
+// https://www.kancloud.cn/yunye/axios/234845 详细配置
 axios.interceptors.request.use(
   config => {
     let userToken = localStorage.getItem('userToken')
@@ -11,9 +11,9 @@ axios.interceptors.request.use(
       config.headers['Authorization'] = userToken
     }
     if (config.method === 'post') {
-      /*config.data = {
+      /* config.data = {
         ...config.data
-      }*/
+      } */
     } else if (config.method === 'get') {
       config.params = {
         _t: Date.parse(new Date()) / 1000,
@@ -29,7 +29,7 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(function (response) {
   // token 已过期，重定向到登录页面
   let code = response.data.code
-  if (1130 === code) {
+  if (code === 1130) {
     Notice.destroy('authc_error')
     Notice.info({
       title: '温馨提示',
@@ -41,7 +41,7 @@ axios.interceptors.response.use(function (response) {
       path: '/login',
       query: {redirect: router.currentRoute.fullPath}
     })
-    //返回reject阻拦本次请求，会报错，但是没办法
+    // 返回reject阻拦本次请求，会报错，但是没办法
     return Promise.reject(response.data.msg)
   } else {
     return response

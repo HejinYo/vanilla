@@ -9,4 +9,3 @@ export const validatePhone = (rule, value, callback) => {
     callback()
   }
 }
-

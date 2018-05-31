@@ -200,7 +200,7 @@
         initPhone: '',
         gettingIdentifyCodeBtnContent: '获取验证码', // “获取验证码”按钮的文字
         avatarModal: false,
-        avatarCropper: {},
+        avatarCropper: {}
       }
     },
     mounted: function () {
@@ -214,13 +214,13 @@
       ])
     },
     methods: {
-      //获取用户信息
+      // 获取用户信息
       getUserInfo () {
         this.$http.get('/api/user/info')
           .then(response => {
             let {code, msg, result} = response.data
             if (code === 0) {
-              //重新获取用户信息
+              // 重新获取用户信息
               this.$store.commit('setLoginUser')
               this.currUser = result
             } else {
@@ -228,7 +228,7 @@
             }
           })
       },
-      //获取验证码
+      // 获取验证码
       getIdentifyCode () {
         this.hasGetIdentifyCode = true
         this.$refs['currUser'].validate((valid) => {
@@ -250,7 +250,7 @@
           }
         })
       },
-      //取消编辑用户信息
+      // 取消编辑用户信息
       cancelEditUserInfor () {
         this.$store.commit('removeTag', 'ownspace_index')
         localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList)
@@ -264,7 +264,7 @@
           name: lastPageName
         })
       },
-      //保存用户信息
+      // 保存用户信息
       saveEdit () {
         this.$refs['currUser'].validate((valid) => {
           if (valid) {
@@ -284,7 +284,7 @@
           }
         })
       },
-      //执行修改密码
+      // 执行修改密码
       saveEditPass () {
         this.$refs['editPasswordForm'].validate((valid) => {
           if (valid) {
@@ -324,7 +324,7 @@
         this.hasGetIdentifyCode = false
         this.identifyCodeRight = false
       },
-      //保存用户信息
+      // 保存用户信息
       saveInfoAjax () {
         this.$refs['currUser'].validate((valid) => {
           if (valid) {
@@ -342,19 +342,19 @@
           }
         })
       },
-      //初始化图片剪切
+      // 初始化图片剪切
       initAvatar () {
         this.avatarModal = !this.avatarModal
         let img1 = document.getElementById('avatarImg')
         this.avatarCropper = new Cropper(img1, {
-          viewMode: 1,//裁剪框 只能在图片内移动
-          dragMode: 'none',//图片就不能拖动
-          aspectRatio: 1,//剪切比例
-          preview: '#preview1',//截图的显示位置,
-          zoomable: false,//是否允许缩放图片
+          viewMode: 1, // 裁剪框 只能在图片内移动
+          dragMode: 'none', // 图片就不能拖动
+          aspectRatio: 1, // 剪切比例
+          preview: '#preview1', // 截图的显示位置,
+          zoomable: false// 是否允许缩放图片
         })
       },
-      //销毁图片剪切
+      // 销毁图片剪切
       destroyAvatar () {
         this.avatarModal = !this.avatarModal
         setTimeout(() => {
@@ -370,7 +370,7 @@
         }
         reader.readAsDataURL(file)
       },
-      //保存头像
+      // 保存头像
       handleCrop: function () {
         this.avatarCropper.getCroppedCanvas().toBlob(avatar => {
           // 创建form对象

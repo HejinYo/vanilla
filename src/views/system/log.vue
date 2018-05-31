@@ -88,11 +88,11 @@
     data () {
       return {
         listLoading: false,
-        //表格数据
+        // 表格数据
         logList: [],
-        //列表选中行
+        // 列表选中行
         currList: [],
-        //分页查询参数
+        // 分页查询参数
         pageParam: {
           total: 0,
           pageNum: 1,
@@ -100,14 +100,14 @@
           sidx: null,
           sort: null
         },
-        //查询参数
+        // 查询参数
         pageQuery: {
           queryKey: 'userName',
           queryValue: null
         },
-        //高级查询
+        // 高级查询
         advancedSearch: false,
-        //高级查询参数
+        // 高级查询参数
         queryParam: {},
         sysLog: {
           id: null,
@@ -116,7 +116,7 @@
           method: null,
           params: null,
           ip: null,
-          createTime: null,
+          createTime: null
         },
         logInfoVisible: false
       }
@@ -132,10 +132,10 @@
       })
     },
     methods: {
-      //加载日志列表
+      // 加载日志列表
       getLogList () {
         this.listLoading = true
-        //默认排序
+        // 默认排序
         if (this.pageParam.sidx === null) {
           this.pageParam.sidx = 'createTime'
           this.pageParam.sort = 'desc'
@@ -155,38 +155,38 @@
           }, 100)
         })
       },
-      //点击页码事件，翻页操作
+      // 点击页码事件，翻页操作
       currentChange (val) {
         this.pageParam.pageNum = val
         this.getLogList()
       },
-      //改变分页数量
+      // 改变分页数量
       sizeChange (val) {
         this.pageParam.pageSize = val
         this.getLogList()
       },
-      //多选事件
+      // 多选事件
       selectionRow (val) {
         this.currList = val
       },
-      //排序
+      // 排序
       sortChange (val) {
         this.pageParam.sidx = val.prop
         this.pageParam.sort = val.order
         this.getLogList()
       },
-      //查询
+      // 查询
       searchLog () {
         if (this.pageQuery.queryValue) {
           this.getLogList()
         }
       },
-      //查询重置
+      // 查询重置
       searchRset () {
         this.pageQuery.queryValue = null
         this.getLogList()
       },
-      //执行 删除操作
+      // 执行 删除操作
       doDelete () {
         if (this.currList.length > 0) {
           this.$Modal.confirm({
@@ -209,7 +209,7 @@
           })
         }
       },
-      //打开日志详情
+      // 打开日志详情
       logInfo (row) {
         reqLogInfo(row.id).then(response => {
           let {code, msg, result} = response.data

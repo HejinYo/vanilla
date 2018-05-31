@@ -33,13 +33,13 @@
       return {
         buttonProps: {
           type: 'ghost',
-          size: 'small',
+          size: 'small'
         },
         filterText: ''
       }
     },
     methods: {
-      //部门树渲染函数
+      // 部门树渲染函数
       renderContent (h, {root, node, data}) {
         return h('span', {
           style: {
@@ -51,10 +51,10 @@
             h('Icon', {
               props: {
                 type: node.level !== 1 ? data[this.icon] ? data[this.icon] : '' : 'home'
-              },
-              /*style: {
+              }
+              /* style: {
                 marginLeft: '8px',
-              }*/
+              } */
             }),
             h('Button', {
               props: Object.assign({}, this.buttonProps, {
@@ -102,7 +102,7 @@
       },
       filterNode (value, data) {
         if (!value) return true
-        //this.$emit('filterNode', value, data)
+        // this.$emit('filterNode', value, data)
         return data[this.label].indexOf(value) !== -1
       }
     },

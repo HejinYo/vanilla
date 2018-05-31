@@ -164,8 +164,8 @@
     data () {
       return {
         listLoading: false,
-        userList: [],//表格数据
-        //分页查询参数
+        userList: [], // 表格数据
+        // 分页查询参数
         pageParam: {
           total: 0,
           pageNum: 1,
@@ -173,14 +173,14 @@
           sidx: null,
           sort: null
         },
-        //查询参数
+        // 查询参数
         pageQuery: {
           queryKey: 'userName',
           queryValue: null
         },
-        //高级查询
+        // 高级查询
         advancedSearch: false,
-        //高级查询参数
+        // 高级查询参数
         queryParam: {
           userName: null,
           email: null,
@@ -188,9 +188,9 @@
           state: null,
           createTime: null
         },
-        //当前选择行
+        // 当前选择行
         currCol: null,
-        //列表选中行
+        // 列表选中行
         currList: [],
         sysUser: {
           userName: null,
@@ -200,7 +200,7 @@
           roleId: null,
           state: 0
         },
-        //新增界面是否显示
+        // 新增界面是否显示
         addUserVisible: false,
         addUserForm: {
           userName: 'user100',
@@ -224,7 +224,7 @@
             {type: 'email', message: '邮箱格式不正确', trigger: 'blur'}
           ],
           roleId: [
-            {required: true, message: '请选择角色'},
+            {required: true, message: '请选择角色'}
           ],
           phone: [
             {validator: validatePhone, trigger: 'change'}
@@ -232,11 +232,10 @@
         },
         // 操作类型 0:增加 1：修改
         operationType: 0,
-        roleList: [],
+        roleList: []
       }
-    }
-    ,
-    computed: {
+    },
+  computed: {
       showDelete () {
         return this.currList.length === 0
       },
@@ -246,9 +245,8 @@
       showOperation () {
         return this.operationType === 0 ? '添加用户' : '编辑用户'
       }
-    }
-    ,
-    mounted: function () {
+    },
+  mounted: function () {
       this.$nextTick(function () {
         this.getUserList()
         this.getRoleList(true).then(value => { this.roleList = value })
@@ -258,10 +256,10 @@
       ...mapActions([
         'getRoleList'
       ]),
-      //加载用户列表
+      // 加载用户列表
       getUserList () {
         this.listLoading = true
-        //默认排序
+        // 默认排序
         if (this.pageParam.sidx === null) {
           this.pageParam.sidx = 'userId'
         }
@@ -280,24 +278,24 @@
           }, 100)
         })
       },
-      //点击页码事件，翻页操作
+      // 点击页码事件，翻页操作
       currentChange (val) {
         this.pageParam.pageNum = val
         this.getUserList()
       },
-      //改变分页数量
+      // 改变分页数量
       sizeChange (val) {
         this.pageParam.pageSize = val
         this.getUserList()
       },
-      //显示新增界面
+      // 显示新增界面
       openSave: function () {
         this.operationType = 0
         this.sysUser = JSON.parse(JSON.stringify(this.addUserForm))
         this.addUserVisible = true
-        //this.resetForm('addUserForm')
+        // this.resetForm('addUserForm')
       },
-      //执行增加操作
+      // 执行增加操作
       doSave () {
         this.$refs['sysUser'].validate((valid) => {
           if (valid) {
@@ -315,7 +313,7 @@
           }
         })
       },
-      //打开编辑用户面板
+      // 打开编辑用户面板
       openEdit (row) {
         this.operationType = 1
         if (this.currCol !== null) {
@@ -330,7 +328,7 @@
           })
         }
       },
-      //执行更新操作
+      // 执行更新操作
       doUpdate () {
         this.$refs['sysUser'].validate((valid) => {
           if (valid) {
@@ -348,7 +346,7 @@
           }
         })
       },
-      //执行 删除操作
+      // 执行 删除操作
       doDelete () {
         if (this.currList.length > 0) {
           this.$Modal.confirm({
@@ -372,7 +370,7 @@
           })
         }
       },
-      //操作
+      // 操作
       operation (flag) {
         if (flag) {
           if (this.operationType === 0) {
@@ -381,34 +379,34 @@
             this.doUpdate()
           }
         } else {
-          //取消操作
+          // 取消操作
           if (this.operationType === 0) {
             this.resetForm('sysUser')
           }
           this.addUserVisible = false
         }
       },
-      //多选事件
+      // 多选事件
       selectionRow (val) {
         this.currList = val
       },
-      //点击行事件
+      // 点击行事件
       clickRow (val) {
         this.currCol = val
       },
-      //排序
+      // 排序
       sortChange (val) {
         this.pageParam.sidx = val.prop
         this.pageParam.sort = val.order
         this.getUserList()
       },
-      //查询
+      // 查询
       searchUser () {
         if (this.advancedSearch || this.pageQuery.queryValue) {
           this.getUserList()
         }
       },
-      //查询重置
+      // 查询重置
       searchRset () {
         if (this.advancedSearch) {
           this.resetForm('queryParam')
@@ -417,11 +415,11 @@
         }
         this.getUserList()
       },
-      //重置表格
+      // 重置表格
       resetForm (formName) {
         this.$refs[formName].resetFields()
       },
-      //iview大坑，时间选择器默认使用utc，不能使用v-model绑定
+      // iview大坑，时间选择器默认使用utc，不能使用v-model绑定
       dateHandleChange (value) {
         this.queryParam.createTime = value
       }

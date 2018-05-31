@@ -63,8 +63,8 @@
               let {code, msg, result} = response.data
               resolve(code === 0)
             }).catch(error => {
-            resolve(false)
-          })
+              resolve(false)
+            })
         })
       },
       handleClickAvator () {

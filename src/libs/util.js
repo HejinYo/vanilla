@@ -4,7 +4,7 @@ import { otherRouter, appRouter } from '@/router/router'
 
 let util = {}
 
-/*修改窗口标题*/
+/* 修改窗口标题 */
 util.title = function (title) {
   title = title || 'vanilla admin'
   window.document.title = title
@@ -27,7 +27,7 @@ util.inOf = function (arr, targetArr) {
   return res
 }
 
-//是否在数组当中
+// 是否在数组当中
 util.oneOf = function (ele, targetArr) {
   if (targetArr.indexOf(ele) >= 0) {
     return true
@@ -221,7 +221,7 @@ util.openNewPage = function (vm, name, argu, query) {
   vm.$store.commit('setCurrentPageName', name)
 }
 
-/*如果在地址栏输入的是一级菜单则默认打开其第一个二级菜单的页面*/
+/* 如果在地址栏输入的是一级菜单则默认打开其第一个二级菜单的页面 */
 util.toDefaultPage = function (routers, name, route, next) {
   let len = routers.length
   let i = 0
@@ -245,7 +245,7 @@ util.toDefaultPage = function (routers, name, route, next) {
 util.fullscreenEvent = function (vm) {
   vm.$store.commit('initCachepage')
   // 权限菜单过滤相关
-  //vm.$store.commit('updateMenulist')
+  // vm.$store.commit('updateMenulist')
   // 全屏相关
 }
 
