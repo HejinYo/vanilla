@@ -18,45 +18,46 @@ const RouterConfig = {
 export const router = new VueRouter(RouterConfig)
 
 router.beforeEach((to, from, next) => {
-  console.log('进入路由' + to.name)
-  iView.LoadingBar.start()
-  // 根据路由名称，设置标题
-  Util.title(to.meta.title)
-  if (to.name === 'login') {
-    next()
-  } else {
-    processAuth().then(value => {
-      if (Cookies.get('locking') === '1' && to.name !== 'locking') { // 判断当前是否是锁定状态
-        next({replace: true, name: 'locking'})
-      } else if (Cookies.get('locking') === '0' && to.name === 'locking') {
-        next(false)
-      } else {
-        // 需要判断权限的路由
-        if (to.meta.requireAuth) {
-          let userToken = localStorage.getItem('userToken')
-          // 判断是否已经登录
-          if (userToken) {
-            // 检查权限
-            if (checkAuth(value, to.name)) {
-              // 如果在地址栏输入的是一级菜单则默认打开其第一个二级菜单的页面
-              Util.toDefaultPage([otherRouter, ...appRouter], to.name, router, next)
+    console.log('进入路由' + to.name)
+    iView.LoadingBar.start()
+    //根据路由名称，设置标题
+    Util.title(to.meta.title)
+    if (to.name === 'login') {
+      next()
+    } else {
+      processAuth().then(value => {
+        if (Cookies.get('locking') === '1' && to.name !== 'locking') { // 判断当前是否是锁定状态
+          next({replace: true, name: 'locking'})
+        } else if (Cookies.get('locking') === '0' && to.name === 'locking') {
+          next(false)
+        } else {
+          // 需要判断权限的路由
+          if (to.meta.requireAuth) {
+            let userToken = localStorage.getItem('userToken')
+            // 判断是否已经登录
+            if (userToken) {
+              //检查权限
+              if (checkAuth(value, to.name)) {
+                // 如果在地址栏输入的是一级菜单则默认打开其第一个二级菜单的页面
+                Util.toDefaultPage([otherRouter, ...appRouter], to.name, router, next)
+              } else {
+                //无权限页面
+                next({replace: true, name: 'error-403'})
+              }
             } else {
-              // 无权限页面
-              next({replace: true, name: 'error-403'})
+              //没有登录，跳转登录页面
+              console.log('跳转登录页面')
+              next({name: 'login'})
             }
           } else {
-            // 没有登录，跳转登录页面
-            console.log('跳转登录页面')
-            next({name: 'login'})
+            // 没有配置权限的路由, 直接通过
+            Util.toDefaultPage([...routers], to.name, router, next)
           }
-        } else {
-          // 没有配置权限的路由, 直接通过
-          Util.toDefaultPage([...routers], to.name, router, next)
         }
-      }
-    })
+      })
+    }
+
   }
-}
 )
 const processAuth = async () => {
   // 获取菜单和权限
@@ -102,32 +103,32 @@ const processMenu = (value) => {
         item.icon = auth.micon ? auth.micon : item.icon
         if (item.children.length === 1) {
           let child = item.children[0]
-          let authItem = Util.getMenuAuth(auth.children, child.name)
-          item.children[0].icon = authItem.micon ? authItem.micon : item.children[0].icon
-          if (child.meta.requireAuth) {
+          if (!child.meta.requireAuth) {
+            menuList.push(item)
+          } else {
+            let authItem = Util.getMenuAuth(auth.children, child.name)
             if (authItem) {
               menuList.push(item)
               currAuth.push(child.name)
+              item.children[0].icon = authItem.micon ? authItem.micon : item.children[0].icon
             }
-          } else {
-            menuList.push(item)
           }
         } else {
           let len = menuList.push(item)
           let childrenArr = []
           // 检查子路由是否拥有权限
           childrenArr = item.children.filter(child => {
-            let authItem = Util.getMenuAuth(auth.children, child.name)
-            child.icon = authItem.micon ? authItem.micon : child.icon
-            if (child.meta.requireAuth) {
+            if (!child.meta.requireAuth) {
+              // 子路由不需要权限
+              return child
+            } else {
+              let authItem = Util.getMenuAuth(auth.children, child.name)
               if (authItem) {
+                child.icon = authItem.micon ? authItem.micon : child.icon
                 // 子路由需要权限，并且用户拥有此权限
                 currAuth.push(child.name)
                 return child
               }
-            } else {
-              // 子路由不需要权限
-              return child
             }
           })
           menuList[len - 1].children = childrenArr
