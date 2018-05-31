@@ -18,46 +18,45 @@ const RouterConfig = {
 export const router = new VueRouter(RouterConfig)
 
 router.beforeEach((to, from, next) => {
-    console.log('进入路由' + to.name)
-    iView.LoadingBar.start()
-    //根据路由名称，设置标题
-    Util.title(to.meta.title)
-    if (to.name === 'login') {
-      next()
-    } else {
-      processAuth().then(value => {
-        if (Cookies.get('locking') === '1' && to.name !== 'locking') { // 判断当前是否是锁定状态
-          next({replace: true, name: 'locking'})
-        } else if (Cookies.get('locking') === '0' && to.name === 'locking') {
-          next(false)
-        } else {
-          // 需要判断权限的路由
-          if (to.meta.requireAuth) {
-            let userToken = localStorage.getItem('userToken')
-            // 判断是否已经登录
-            if (userToken) {
-              //检查权限
-              if (checkAuth(value, to.name)) {
-                // 如果在地址栏输入的是一级菜单则默认打开其第一个二级菜单的页面
-                Util.toDefaultPage([otherRouter, ...appRouter], to.name, router, next)
-              } else {
-                //无权限页面
-                next({replace: true, name: 'error-403'})
-              }
+  console.log('进入路由' + to.name)
+  iView.LoadingBar.start()
+  // 根据路由名称，设置标题
+  Util.title(to.meta.title)
+  if (to.name === 'login') {
+    next()
+  } else {
+    processAuth().then(value => {
+      if (Cookies.get('locking') === '1' && to.name !== 'locking') { // 判断当前是否是锁定状态
+        next({replace: true, name: 'locking'})
+      } else if (Cookies.get('locking') === '0' && to.name === 'locking') {
+        next(false)
+      } else {
+        // 需要判断权限的路由
+        if (to.meta.requireAuth) {
+          let userToken = localStorage.getItem('userToken')
+          // 判断是否已经登录
+          if (userToken) {
+            // 检查权限
+            if (checkAuth(value, to.name)) {
+              // 如果在地址栏输入的是一级菜单则默认打开其第一个二级菜单的页面
+              Util.toDefaultPage([otherRouter, ...appRouter], to.name, router, next)
             } else {
-              //没有登录，跳转登录页面
-              console.log('跳转登录页面')
-              next({name: 'login'})
+              // 无权限页面
+              next({replace: true, name: 'error-403'})
             }
           } else {
-            // 没有配置权限的路由, 直接通过
-            Util.toDefaultPage([...routers], to.name, router, next)
+            // 没有登录，跳转登录页面
+            console.log('跳转登录页面')
+            next({name: 'login'})
           }
+        } else {
+          // 没有配置权限的路由, 直接通过
+          Util.toDefaultPage([...routers], to.name, router, next)
         }
-      })
-    }
-
+      }
+    })
   }
+}
 )
 const processAuth = async () => {
   // 获取菜单和权限
